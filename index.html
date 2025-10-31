@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardioCheck - ECG Heart Monitor</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/home.css">
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>Cardiogram</span>
+            </div>
+
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#team">Our Team</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#use-cases">Use Cases</a></li>
+                <li><a href="#features">Features</a></li>
+            </ul>
+
+            <div class="nav-right">
+                <div class="connection-status">
+                    <button class="status-btn" id="wifiBtn">
+                        <i class="fas fa-wifi"></i>
+                        <span class="status-dot"></span>
+                    </button>
+                    <button class="status-btn" id="bleBtn">
+                        <i class="fab fa-bluetooth-b"></i>
+                        <span class="status-dot"></span>
+                    </button>
+                </div>
+                <a href="login.html" class="btn-signin">
+                    <i class="fas fa-user"></i>
+                    Sign In
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="home">
+        <div class="gradient-bg"></div>
+        
+        <div class="hero-container">
+            <div class="hero-content">
+                <span class="hero-badge">
+                    <i class="fas fa-certificate"></i>
+                    Medical Grade Certified
+                </span>
+                
+                <h1 class="hero-title">
+                    Monitor Your Heart,<br>
+                    <span class="gradient-text">Anytime, Anywhere</span>
+                </h1>
+                
+                <p class="hero-subtitle">
+                    Professional ECG monitoring at your fingertips. Real-time heart health analysis with medical-grade accuracy.
+                </p>
+
+                <div class="hero-buttons">
+                    <!-- YE BUTTON DASHBOARD PE LE JAYEGA -->
+                    <button class="btn-primary" onclick="window.location.href='dashboard.html'">
+                        <i class="fas fa-play-circle"></i>
+                        Start ECG Test
+                    </button>
+                    <button class="btn-secondary">
+                        <i class="fas fa-book-open"></i>
+                        Learn More
+                    </button>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <h3>10K+</h3>
+                        <p>Active Users</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>99.9%</h3>
+                        <p>Accuracy Rate</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>24/7</h3>
+                        <p>Monitoring</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="ecg-card">
+                    <div class="ecg-header">
+                        <span class="status-live">
+                            <span class="live-dot"></span>
+                            LIVE
+                        </span>
+                        <span class="heart-rate" id="heartRate">72 BPM</span>
+                    </div>
+                    <canvas id="heroEcgCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ANIMATED FLOW -->
+    <section class="flow-section">
+        <div class="ecg-line-animation"></div>
+        <div class="section-container">
+            <div class="flow-text">
+                <span style="--delay: 0">From your heart</span>
+            </div>
+            <div class="flow-arrows">
+                <span style="--delay: 1">→</span>
+            </div>
+            <div class="flow-text">
+                <span style="--delay: 2">to your doctor</span>
+            </div>
+            <div class="flow-arrows">
+                <span style="--delay: 3">→</span>
+            </div>
+            <div class="flow-text">
+                <span style="--delay: 4">in seconds</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- TEAM SECTION -->
+    <section class="team-section scroll-animate" id="team">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge">Our Team</span>
+                <h2 class="section-title">Meet The Innovators</h2>
+                <p class="section-subtitle">
+                    Dedicated engineers building the future of healthcare monitoring
+                </p>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="team-photo">👤</div>
+                    <h3>Aman Gusain</h3>
+                    <p class="team-role">Team Leader</p>
+                    <p>Leading the project vision and coordinating hardware-software integration</p>
+                </div>
+
+                <div class="team-card">
+                    <div class="team-photo">👤</div>
+                    <h3>Dipendra Singh Kalura</h3>
+                    <p class="team-role">Hardware & BLE Specialist</p>
+                    <p>Developing ECG hardware and Bluetooth connectivity solutions</p>
+                </div>
+
+                <div class="team-card">
+                    <div class="team-photo">👤</div>
+                    <h3>Devansh Indoliyan</h3>
+                    <p class="team-role">Software Developer</p>
+                    <p>Building Flutter app and cloud infrastructure</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+  <div class="section-container">
+    <div class="section-header">
+      <span class="section-badge">System Architecture</span>
+      <h2 class="section-title">How Our System Works</h2>
+      <p class="section-subtitle">End-to-end ECG monitoring from hardware to cloud</p>
+    </div>
+
+    <div class="flow-diagram" role="list" aria-label="How Our ECG System Works">
+
+      <article class="flow-step scroll-animate" role="listitem" tabindex="0" aria-describedby="desc-step1">
+        <div class="flow-icon" aria-hidden="true">
+          <i class="fas fa-microchip" title="Hardware"></i>
+        </div>
+        <div class="flow-content">
+          <h3 id="desc-step1">Step 1: Hardware (ECG Device)</h3>
+          <p>Captures ECG signals using Heart BioAmp Candy + nRF52840 microcontroller with medical-grade precision.</p>
+        </div>
+      </article>
+
+      <div class="flow-arrow" aria-hidden="true">↓</div>
+
+      <article class="flow-step scroll-animate" role="listitem" tabindex="0" aria-describedby="desc-step2">
+        <div class="flow-icon" aria-hidden="true">
+          <i class="fab fa-bluetooth-b" title="Bluetooth Streaming"></i>
+        </div>
+        <div class="flow-content">
+          <h3 id="desc-step2">Step 2: Bluetooth Streaming</h3>
+          <p>Sends ECG data wirelessly via BLE in real-time at 60 FPS for smooth visualization.</p>
+        </div>
+      </article>
+
+      <div class="flow-arrow" aria-hidden="true">↓</div>
+
+      <article class="flow-step scroll-animate" role="listitem" tabindex="0" aria-describedby="desc-step3">
+        <div class="flow-icon" aria-hidden="true">
+          <i class="fas fa-mobile-alt" title="Flutter Mobile App"></i>
+        </div>
+        <div class="flow-content">
+          <h3 id="desc-step3">Step 3: Flutter Mobile App</h3>
+          <p>Displays ECG graph, computes BPM using Pan-Tompkins algorithm, and exports PDF reports.</p>
+        </div>
+      </article>
+
+      <div class="flow-arrow" aria-hidden="true">↓</div>
+
+      <article class="flow-step scroll-animate" role="listitem" tabindex="0" aria-describedby="desc-step4">
+        <div class="flow-icon" aria-hidden="true">
+          <i class="fas fa-cloud" title="Supabase Cloud"></i>
+        </div>
+        <div class="flow-content">
+          <h3 id="desc-step4">Step 4: Supabase Cloud</h3>
+          <p>Securely stores all ECG sessions with encrypted data and instant sync across devices.</p>
+        </div>
+      </article>
+
+      <div class="flow-arrow" aria-hidden="true">↓</div>
+
+      <article class="flow-step scroll-animate" role="listitem" tabindex="0" aria-describedby="desc-step5">
+        <div class="flow-icon" aria-hidden="true">
+          <i class="fas fa-user-md" title="Doctor Dashboard"></i>
+        </div>
+        <div class="flow-content">
+          <h3 id="desc-step5">Step 5: Doctor Dashboard</h3>
+          <p>Doctors view reports, monitor patients remotely, and receive AI-based arrhythmia alerts.</p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="use-cases scroll-animate" id="use-cases">
+  <div class="section-container">
+    <div class="section-header">
+      <span class="section-badge">Use Cases</span>
+      <h2 class="section-title">Who Can Benefit?</h2>
+      <p class="section-subtitle">Designed for both patients and healthcare professionals</p>
+    </div>
+
+    <div class="use-case-grid">
+      <article class="use-case-card" tabindex="0" aria-label="For Patients Use Cases">
+        <div class="use-case-icon" aria-hidden="true">
+          <i class="fas fa-heartbeat" title="Patients"></i>
+        </div>
+        <h3>For Patients</h3>
+        <ul class="use-case-list">
+          <li>30-second ECG test at home</li>
+          <li>Real-time heart rate monitoring</li>
+          <li>Instant abnormality alerts</li>
+          <li>One-click PDF report sharing</li>
+          <li>Historical data tracking</li>
+          <li>No cables or complex setup</li>
+        </ul>
+      </article>
+
+      <article class="use-case-card" tabindex="0" aria-label="For Doctors Use Cases">
+        <div class="use-case-icon" aria-hidden="true">
+          <i class="fas fa-user-md" title="Doctors"></i>
+        </div>
+        <h3>For Doctors</h3>
+        <ul class="use-case-list">
+          <li>Remote patient ECG monitoring</li>
+          <li>AI-based arrhythmia detection</li>
+          <li>Secure cloud data access</li>
+          <li>Multi-patient dashboard view</li>
+          <li>Exportable medical reports</li>
+          <li>Real-time critical alerts</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+    <!-- FEATURES -->
+    <section class="features-section scroll-animate" id="features">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge">Technical Specifications</span>
+                <h2 class="section-title">Key Features & Capabilities</h2>
+                <p class="section-subtitle">
+                    Hospital-grade technology in a portable device
+                </p>
+            </div>
+
+            <div class="features-table">
+                <div class="feature-row">
+                    <div class="feature-name">
+                        <i class="fas fa-bolt"></i>
+                        Real-Time ECG
+                    </div>
+                    <div class="feature-desc">
+                        60 FPS live ECG streaming with Bluetooth Low Energy for smooth, lag-free visualization
+                    </div>
+                </div>
+
+                <div class="feature-row">
+                    <div class="feature-name">
+                        <i class="fas fa-heart"></i>
+                        Accurate BPM Detection
+                    </div>
+                    <div class="feature-desc">
+                        Pan-Tompkins algorithm for reliable heart rate calculation with 99.9% medical-grade accuracy
+                    </div>
+                </div>
+
+                <div class="feature-row">
+                    <div class="feature-name">
+                        <i class="fas fa-file-pdf"></i>
+                        PDF & Cloud Reports
+                    </div>
+                    <div class="feature-desc">
+                        One-click export to PDF format with automatic cloud backup to Supabase for easy sharing
+                    </div>
+                </div>
+
+                <div class="feature-row">
+                    <div class="feature-name">
+                        <i class="fas fa-bell"></i>
+                        Instant Alerts
+                    </div>
+                    <div class="feature-desc">
+                        Real-time detection of abnormal heartbeats with immediate push notifications
+                    </div>
+                </div>
+
+                <div class="feature-row">
+                    <div class="feature-name">
+                        <i class="fas fa-lock"></i>
+                        Data Security
+                    </div>
+                    <div class="feature-desc">
+                        End-to-end encrypted BLE transmission with secure Supabase cloud storage (HIPAA compliant)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript Files -->
+    <script src="js/main.js"></script>
+    <script src="js/bluetooth.js"></script>
+    <script src="js/ecg.js"></script>
+</body>
+</html>

@@ -1,0 +1,591 @@
+/* =========================================
+   DASHBOARD.CSS - ECG Test Dashboard Styling
+   ========================================= */
+
+/* Container for entire dashboard */
+.dashboard-container {
+  max-width: 1080px;
+  margin: 3rem auto 6rem;
+  padding: 0 1rem;
+  font-family: 'Inter', sans-serif;
+  color: #dde2fc;
+}
+
+/* ===== Steps Sections ===== */
+.step-section {
+  display: none; /* Hidden by default */
+  animation: fadeInUp 0.7s ease forwards;
+}
+.step-section.active {
+  display: block;
+}
+
+/* Step card */
+.step-card {
+  background: rgba(36,39,74, 0.88); /* Glassy dark cards */
+  border: 1.6px solid #232340;
+  border-radius: 20px;
+  padding: 2.3rem 2.5rem;
+  box-shadow: 0 15px 30px rgba(99, 102, 241, 0.15);
+  position: relative;
+  overflow: visible;
+  transition: box-shadow 0.25s ease;
+}
+.step-card.full-width {
+  width: 100%;
+}
+
+/* Step header */
+.step-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.step-number {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.4rem;
+}
+.step-header h2 {
+  font-size: 2rem;
+  color: #d7d9f6;
+  margin-bottom: 0.3rem;
+}
+.step-header p {
+  font-size: 1rem;
+  color: #aeb4d5;
+}
+
+/* ===== User Details Form ===== */
+.user-form {
+  max-width: 620px;
+  margin: 0 auto;
+}
+.form-row {
+  display: flex;
+  gap: 1.8rem;
+  justify-content: space-between;
+  margin-bottom: 1.8rem;
+}
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+label {
+  font-weight: 600;
+  color: #c7cadb;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+input, select, textarea {
+  background: rgba(21, 23, 43, 0.9);
+  border: 1px solid #3d4b7a;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  color: #dde2fc;
+  font-size: 1rem;
+  transition: border-color 0.22s ease;
+}
+input::placeholder, textarea::placeholder {
+  color: #8289b5;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 7px var(--primary);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.checkbox-group {
+  margin-top: 1rem;
+}
+.checkbox-label {
+  color: #d1d2e1;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Form action - submit button */
+.form-actions {
+  margin-top: 2.4rem;
+  text-align: center;
+}
+.btn-large {
+  font-size: 1.15rem;
+  padding: 1.15rem 2.8rem;
+  border-radius: 40px;
+  box-shadow: 0 12px 26px rgba(99, 102, 241, 0.85);
+}
+.btn-primary.btn-large {
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.btn-primary.btn-large:hover {
+  background: #7f81f9;
+  transform: scale(1.03);
+}
+.btn-primary.btn-large:focus {
+  outline: 3px solid var(--secondary);
+}
+
+/* ===== Device Connection Section ===== */
+.connection-options {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.2rem;
+}
+.connection-card {
+  background: rgba(36,39,74, 0.85);
+  border-radius: 20px;
+  max-width: 300px;
+  padding: 1.8rem 2rem 2.5rem;
+  text-align: center;
+  box-shadow: 0 6px 28px rgba(99,102,241,0.15);
+  transition: box-shadow 0.3s ease, transform 0.22s ease;
+}
+.connection-card:hover {
+  box-shadow: 0 18px 46px rgba(99,102,241,0.28);
+  transform: translateY(-6px);
+}
+.connection-icon {
+  font-size: 3.8rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+.connection-card h3 {
+  font-size: 1.3rem;
+  color: #dde2fc;
+  margin-bottom: 0.3rem;
+}
+.connection-card p {
+  font-size: 1rem;
+  color: #aeb4d5;
+  margin-bottom: 1.8rem;
+}
+.connection-card button {
+  width: 100%;
+}
+.btn-primary, .btn-secondary {
+  font-size: 1rem;
+  padding: 0.85rem 0;
+  border-radius: 30px;
+  font-weight: 600;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+.btn-primary:hover, .btn-secondary:hover {
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+/* ===== Connection Status Box ===== */
+.connection-status-box {
+  text-align: center;
+  margin-top: 2.2rem;
+  color: #aaddaa;
+}
+.spinner {
+  margin: 0 auto 1rem;
+  border: 5px solid #e8e8e8;
+  border-top: 5px solid var(--primary);
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0);}
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== Device Info Success ===== */
+.device-info {
+  margin-top: 2rem;
+  text-align: center;
+}
+.success-icon {
+  font-size: 3.5rem;
+  color: var(--success);
+  margin-bottom: 0.5rem;
+}
+.device-info h3 {
+  font-size: 1.8rem;
+  margin-bottom: 0.6rem;
+  color: #cee6cd;
+}
+.device-info p {
+  font-size: 1.1rem;
+  color: #a6c7a3;
+  margin-bottom: 1.7rem;
+}
+.btn-success {
+  background: var(--success);
+  color: #171a26;
+  font-weight: 600;
+  border: none;
+  border-radius: 32px;
+  padding: 1.15rem 2.8rem;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(31, 208, 124, 0.78);
+  transition: background 0.2s ease;
+}
+.btn-success:hover {
+  background: #3ff29f;
+}
+
+/* ===== ECG Test Section ===== */
+.ecg-test-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.test-timer {
+  margin-bottom: 2rem;
+}
+.timer-circle {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+.timer-svg {
+  transform: rotate(-90deg);
+  width: 120px;
+  height: 120px;
+}
+.timer-bg {
+  fill: none;
+  stroke: #eee;
+  stroke-width: 10;
+}
+.timer-progress {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 283; /* circumference for r=45 */
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+}
+.timer-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 800;
+  font-size: 1.9rem;
+  color: #dde2fc;
+}
+.timer-text small {
+  font-weight: normal;
+  font-size: 1.05rem;
+  color: #aeb4d5;
+  display: block;
+}
+
+/* Live ECG monitor */
+.ecg-monitor {
+  width: 100%;
+  max-width: 720px;
+  background: rgba(36,39,74,0.85);
+  border-radius: 20px;
+  padding: 1.8rem 1.4rem;
+  box-shadow: 0 12px 42px rgba(99,102,241,0.27);
+  margin-bottom: 2.1rem;
+}
+.ecg-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.ecg-status .status-live {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: var(--success);
+}
+.metric {
+  text-align: right;
+  margin-left: 1rem;
+}
+.metric-label {
+  font-size: 0.9rem;
+  color: #aeb4d5;
+}
+.metric-value {
+  font-weight: 700;
+  font-size: 1.45rem;
+  color: var(--primary);
+}
+.metric-unit {
+  font-size: 0.9rem;
+  color: #aeb4d5;
+}
+
+#liveEcgCanvas {
+  width: 100%;
+  height: 160px;
+  background: #1a1c2d;
+  border-radius: 14px;
+  box-shadow: inset 0 0 12px 1px var(--primary);
+}
+
+/* Instructions below ECG */
+.test-instructions {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  color: #b0b2c6;
+}
+.instruction-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-weight: 500;
+  font-size: 1.05rem;
+}
+.instruction-item i {
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+
+/* ===== Results Section ===== */
+.report-summary {
+  margin-bottom: 2rem;
+}
+.result-status.success {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #80c97d;
+}
+.result-status.success i {
+  font-size: 2.2rem;
+}
+.results-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+.result-card {
+  background: rgba(36, 39, 74, 0.82);
+  border: 1.5px solid #232340;
+  border-radius: 20px;
+  padding: 1.6rem 2rem;
+  width: 240px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(99,102,241,0.25);
+  transition: box-shadow 0.25s ease, transform 0.21s ease;
+  cursor: default;
+}
+.result-card:hover {
+  box-shadow: 0 22px 48px rgba(99,102,241,0.5);
+  transform: translateY(-6px);
+}
+.result-icon i {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 0.6rem;
+}
+.result-info .result-label {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #cfd3ee;
+  margin-bottom: 0.3rem;
+}
+.result-info .result-value {
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #dde2fc;
+}
+.result-status-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.result-status-text.normal {
+  color: #80c97d; /* green */
+}
+.result-status-text.warning {
+  color: #f1c232; /* yellow/orange */
+}
+.result-status-text.error {
+  color: #fc5c5c; /* red */
+}
+
+/* Report ECG preview */
+.report-preview {
+  margin-bottom: 2rem;
+}
+.report-preview h3 {
+  font-size: 1.5rem;
+  color: #dde2fc;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+#reportEcgCanvas {
+  width: 100%;
+  height: 180px;
+  border-radius: 14px;
+  box-shadow: inset 0 0 18px 2px var(--primary);
+  background: #23253b;
+}
+
+/* Patient summary */
+.patient-summary {
+  margin-bottom: 2rem;
+}
+.patient-summary h3 {
+  font-size: 1.4rem;
+  color: #dde2fc;
+  margin-bottom: 1rem;
+}
+.info-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.info-item {
+  flex: 1 1 200px;
+  background: rgba(36, 39, 74, 0.78);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 18px rgba(99, 102, 241, 0.15);
+  color: #aeb4d5;
+}
+.info-label {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  display: block;
+  color: #c7cada;
+}
+.info-value {
+  font-size: 1.1rem;
+  color: #dde2fc;
+}
+
+/* Report action buttons */
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.3rem;
+  justify-content: center;
+}
+.report-actions button {
+  flex: 1 1 180px;
+  border-radius: 32px;
+  padding: 1.1rem 1.3rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.18);
+  cursor: pointer;
+  border: none;
+  transition: background 0.25s ease;
+}
+.report-actions .btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.report-actions .btn-primary:hover {
+  background: #7f81f9;
+}
+.report-actions .btn-success {
+  background: var(--success);
+  color: #171a26;
+}
+.report-actions .btn-success:hover {
+  background: #3ff29f;
+}
+.report-actions .btn-secondary {
+  background: #dedffb;
+  color: #575f94;
+}
+.report-actions .btn-secondary:hover {
+  background: #bbbbdd;
+}
+
+/* ====== MODAL STYLES ====== */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(23, 26, 42, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1500;
+}
+
+.modal-content {
+  background: rgba(36, 39, 74, 0.95);
+  border-radius: 20px;
+  padding: 2rem;
+  width: 320px;
+  box-shadow: 0 14px 38px rgba(99, 102, 241, 0.23);
+  color: #dde2fc;
+  position: relative;
+  transform: translateY(30px);
+  transition: transform 0.3s ease;
+}
+
+.modal.show {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 1.6rem;
+  color: #aeb4d5;
+  cursor: pointer;
+}
+
+.modal-content h2 {
+  margin-bottom: 1.3rem;
+  font-weight: 700;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.4rem;
+}

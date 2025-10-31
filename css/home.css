@@ -1,0 +1,823 @@
+/* ============================================
+   HOME.CSS - Handcrafted Professional Version
+   ============================================ */
+
+/* ====== GLOBAL RESET ====== */
+/* Reset margins, paddings for all elements and apply box-sizing for easier sizing */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+/* Body: primary font, background, base text color, and prevent horizontal scroll */
+body {
+  font-family: 'Inter', sans-serif;
+  background: #171a26;
+  color: #dde2fc;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+/* Links inherit color and have no underline */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+/* Root CSS variables for easy theme adjustments */
+:root {
+  --primary: #6366f1;
+  --secondary: #8b5cf6;
+  --success: #1fd07c;
+  --bg-dark: #171a26;
+  --bg-card: #f5f6fe;
+  --border: #23233c;
+  --shadow: 0 8px 32px rgba(99,102,241,0.24);
+}
+
+/* ====== SLICER ANIMATION BACKGROUND ====== */
+/* Fullscreen animated slicer effect behind hero section */
+.slicer-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0; /* behind everything */
+  pointer-events: none; /* no interference on clicks */
+  overflow: hidden;
+}
+/* Each slicer bar skewed and animated horizontally */
+.slicer-bar {
+  position: absolute;
+  left: -40vw;
+  width: 140vw;
+  height: 18vh;
+  transform: skew(-18deg);
+  opacity: .27;
+  background: linear-gradient(87deg, var(--primary), var(--secondary) 85%);
+  filter: blur(0.7px);
+  animation: slicerMove 3.7s cubic-bezier(.8,-0.02,.68,1) infinite alternate;
+}
+/* Different offsets and opacity for layered effect */
+.slicer-bar:nth-child(2) {
+  top: 20vh;
+  opacity: .42;
+  background: linear-gradient(90deg, #111112 38%, var(--primary) 98%);
+  animation-delay: .7s;
+}
+.slicer-bar:nth-child(3) {
+  top: 44vh;
+  opacity: .18;
+  background: linear-gradient(100deg, var(--secondary), #fff0 97%);
+  animation-delay: 1.2s;
+}
+.slicer-bar:nth-child(4) {
+  top: 63vh;
+  opacity: .22;
+  background: linear-gradient(93deg, #1fd07c 20%, var(--primary) 100%);
+  animation-delay: 2.1s;
+}
+.slicer-bar:nth-child(5) {
+  top: 78vh;
+  opacity: .12;
+  background: linear-gradient(80deg, #fff0 23%, var(--secondary) 97%);
+  animation-delay: 2.5s;
+}
+/* Horizontal movement of bars */
+@keyframes slicerMove {
+  0% { left: -45vw; }
+  50% { left: -15vw; }
+  100% { left: 0vw; }
+}
+
+/* ====== HERO SECTION ====== */
+/* Main hero wrapper with centered column layout */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4.2rem 1rem 1.7rem 1rem;
+  background: linear-gradient(120deg, #171a26 0%, #1b1e2e 70%, #21244e 98%);
+  overflow: hidden;
+}
+
+/* Container to limit hero width and stack content vertically on mobile */
+.hero-container {
+  width: 100%;
+  max-width: 1310px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 2; /* ensure above slicer */
+  gap: 2.2rem;
+}
+
+/* Hero text content with fade-in animation */
+.hero-content {
+  width: 100%;
+  max-width: 620px;
+  text-align: center;
+  animation: fadeInUp 1.8s .2s both;
+}
+
+/* Badge/certification style */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(99,102,241,.14);
+  border: 1px solid rgba(99,102,241,.33);
+  padding: 0.5rem 1.3rem;
+  border-radius: 30px;
+  color: var(--primary);
+  font-size: .99rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  letter-spacing: .024em;
+  box-shadow: 0 2px 14px rgba(99,102,241,.09);
+  transition: background .2s;
+}
+
+/* Main hero heading with gradient text span */
+.hero-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.1rem;
+  color: #ffffff;
+  letter-spacing: -.02em;
+  text-shadow: 0 2px 16px rgba(30,35,70,.13);
+  opacity: .98;
+  animation: fadeInUp 1.7s .38s both;
+}
+.gradient-text {
+  background: linear-gradient(89deg, var(--primary) 25%, var(--secondary) 87%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtitle description */
+.hero-subtitle {
+  font-size: 1.16rem;
+  color: #ced1e2;
+  margin-bottom: 2.5rem;
+  line-height: 1.57;
+  font-weight: 400;
+  animation: fadeInUp 1.9s .44s both;
+}
+
+/* Buttons stacked vertically on mobile */
+.hero-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.93rem;
+  align-items: center;
+  margin-bottom: 2.3rem;
+}
+
+/* Common button style */
+.btn-primary, .btn-secondary {
+  font-size: 1.03rem;
+  min-width: 180px;
+  padding: 1.07rem;
+  border-radius: 30px;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(99,102,241,.10);
+  transition: background .17s, transform .16s, box-shadow .19s;
+  cursor: pointer;
+  margin-bottom: 0;
+  background: var(--primary);
+  color: #fff;
+}
+/* Secondary button variant */
+.btn-secondary {
+  background: #e6eaf9;
+  color: var(--primary);
+  border: 1.6px solid #b9bbf7;
+}
+.btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 12px 26px rgba(99,102,241,.15);
+  transform: scale(1.04);
+}
+.btn-secondary:hover {
+  background: #dde4fc;
+  color: var(--secondary);
+  transform: scale(1.04);
+}
+.btn-primary:focus,
+.btn-secondary:focus {
+  outline: 2px solid var(--secondary);
+  outline-offset: 3px;
+}
+
+/* Hero stats container */
+.hero-stats {
+  width: 100%;
+  display: flex;
+  gap: 2.2rem;
+  justify-content: center;
+  padding-top: 1.8rem;
+  border-top: 1px solid #24234f;
+}
+/* Stat item text styling */
+.stat-item h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.015em;
+}
+.stat-item p {
+  color: #dbdbf6;
+  font-size: 0.99rem;
+}
+
+/* ====== HERO VISUAL AND ECG CARD ====== */
+/* Hero visual container with min height */
+.hero-visual {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 260px;
+}
+/* ECG card styling with glassy effect and shadow on hover */
+.ecg-card {
+  background: rgba(36,39,74, 0.82); /* Glassy dark background */
+  border: 1.5px solid #232340;
+  border-radius: 20px;
+  padding: 2rem 2.2rem;
+  box-shadow: 0 8px 28px rgba(99,102,241,0.13);
+  min-width: 240px;
+  max-width: 380px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(9px);
+  transition: background 0.17s, box-shadow 0.19s, transform 0.18s;
+  animation: entryFadeSlide .7s cubic-bezier(.17,.89,.82,.97) both;
+}
+.ecg-card:hover {
+  background: rgba(60,100,241,0.12);
+  box-shadow: 0 18px 46px rgba(99,102,241,0.19);
+  border-color: var(--primary);
+  transform: translateY(-4px) scale(1.015);
+}
+.ecg-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+/* ECG header with live status and heart rate */
+.ecg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.7rem;
+}
+.status-live {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--success);
+  font-weight: 700;
+  font-size: 0.97rem;
+  letter-spacing: 0.03em;
+}
+.live-dot {
+  width: 11px;
+  height: 11px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 2.2s infinite;
+  border: 2px solid #e1ffee;
+  display: inline-block;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(31,208,124,0); }
+  60% { box-shadow: 0 0 0 7px rgba(31,208,124,0.09); }
+}
+.heart-rate {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+/* Canvas styling for ECG graph */
+#heroEcgCanvas {
+  width: 100%;
+  min-height: 180px;
+  height: 240px;
+  background: linear-gradient(103deg, #ded9fa 20%, #f3f3fb 100%);
+  border-radius: 13px;
+  margin-top: 0.2rem;
+  box-shadow: 0 2px 18px rgba(99,102,241,0.10);
+  transition: box-shadow 0.22s;
+}
+
+/* ====== ANIMATED FLOW SECTION ====== */
+.flow-section {
+  padding: 5.2rem 1rem;
+  background: linear-gradient(180deg, #191e2b 0%, #23253b 100%);
+  position: relative;
+  overflow: hidden;
+}
+.ecg-line-animation {
+  position: absolute;
+  top: 60%;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--success);
+  box-shadow: 0 0 24px var(--success);
+  opacity: 0.27;
+  animation: ecgPulse 2.7s cubic-bezier(.5,0,.5,1) infinite;
+}
+@keyframes ecgPulse {
+  0%, 100% { transform: translateX(-92%); }
+  50% { transform: translateX(98%); }
+}
+.flow-text {
+  text-align: center;
+  font-size: 2.3rem;
+  font-weight: 700;
+  margin-bottom: 0.7rem;
+  color: #fff;
+  opacity: 0;
+  animation: fadeInUp 1.2s forwards;
+}
+.flow-arrows {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 1.9rem;
+  color: #bbbccd;
+  margin: 1.2rem 0;
+}
+
+/* ====== TEAM SECTION ====== */
+/* Section wrapper with dark background */
+.team-section {
+  padding: 5rem 1rem;
+  background: #181e30;
+}
+/* Flex column layout for mobile */
+.team-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  justify-content: center;
+  margin-top: 2.2rem;
+}
+/* Card style */
+.team-card {
+  background: rgba(36,39,74, 0.82); /* glassy dark background */
+  border: 1.5px solid #232340;
+  border-radius: 20px;
+  padding: 1.7rem 1.4rem 1.3rem;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 8px 28px rgba(99,102,241,0.13);
+  transition: background 0.17s, box-shadow 0.19s, transform 0.18s;
+  animation: entryFadeSlide .75s cubic-bezier(.17,.89,.82,.97) both;
+}
+.team-card:hover {
+  background: rgba(60,100,241,0.12);
+  box-shadow: 0 18px 46px rgba(99,102,241,0.19);
+  border-color: var(--primary);
+  transform: translateY(-4px) scale(1.015);
+}
+.team-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  opacity: 0.7;
+  pointer-events: none;
+  border-radius: 20px 20px 0 0;
+  transform: scaleX(0);
+  transition: transform 0.34s;
+}
+.team-card:hover::before { transform: scaleX(1); }
+/* Circular photo placeholder style */
+.team-photo {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 1.1rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.1rem;
+  color: #fff;
+  border: 4px solid #f3f3fb;
+  box-shadow: 0 6px 24px rgba(99,102,241,0.15);
+}
+/* Name and role style */
+.team-card h3 {
+  font-size: 1.31rem;
+  margin-bottom: 0.3rem;
+  color: #dde2fc;
+}
+.team-role {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 1.06rem;
+  margin-bottom: 0.7rem;
+}
+.team-card p {
+  color: #aeb4d5;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+/* ====== HOW IT WORKS ====== */
+/* Section style: darker background, moderate padding, subtle text color */
+.how-it-works {
+  padding: 5rem 1rem 4rem;
+  background: #1a1c2d;
+  color: #c7c9d9;
+  font-family: 'Inter', sans-serif;
+}
+/* Container for all steps with center alignment */
+.flow-diagram {
+  max-width: 860px;
+  margin: 3rem auto 0;
+  background: #24263e;
+  border-radius: 12px;
+  padding: 2.2rem 2rem;
+  box-shadow: none;
+}
+/* Each step card styling: dark background with subtle hover */
+.flow-step {
+  background: #2e314f;
+  border-radius: 14px;
+  padding: 1.5rem 1.8rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  transition: background-color 0.25s ease;
+  cursor: default;
+}
+.flow-step:last-child {
+  margin-bottom: 0;
+}
+.flow-step:hover {
+  background-color: #3a3f68;
+}
+/* Icon style: muted pale background on dark card */
+.flow-icon {
+  width: 56px;
+  height: 56px;
+  background: #a6a9c8;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: #222333;
+  user-select: none;
+  flex-shrink: 0;
+}
+/* Heading and paragraph inside each step */
+.flow-content h3 {
+  font-size: 1.18rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: #e1e2ea;
+}
+.flow-content p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #b0b2c6;
+}
+/* Arrow styling between steps */
+.flow-arrow {
+  font-size: 1.8rem;
+  color: #676a82;
+  margin: 1rem 0;
+  text-align: center;
+  user-select: none;
+  opacity: 0.7;
+}
+
+/* ====== USE CASES ====== */
+/* Section with padding and dark background consistent with site */
+.use-cases {
+  padding: 5.1rem 1rem;
+  background: #191e2b;
+}
+/* Vertical stacking grid for mobile */
+.use-case-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  justify-content: center;
+  max-width: 1020px;
+  margin: 3.6rem auto 0;
+}
+/* Cards styled like glassy accented rectangles */
+.use-case-card {
+  background: rgba(36,39,74, 0.82);
+  border: 1.5px solid #232340;
+  border-radius: 20px;
+  padding: 2rem 1.1rem;
+  min-width: 250px;
+  transition: box-shadow 0.28s, border 0.19s, transform 0.21s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(99,102,241,0.13);
+  animation: entryFadeSlide 0.83s cubic-bezier(.17,.91,.83,.99) both;
+}
+.use-case-card::after {
+  content: '';
+  position: absolute;
+  top: -38%;
+  right: -40%;
+  width: 170%;
+  height: 190%;
+  background: radial-gradient(circle at 65% 80%, var(--primary) 10%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.32s;
+  pointer-events: none;
+}
+.use-case-card:hover::after {
+  opacity: 1;
+}
+.use-case-card:hover {
+  box-shadow: 0 20px 56px rgba(99,102,241,0.19);
+  border-color: var(--primary);
+  transform: translateY(-7px) scale(1.025);
+}
+/* Icon above the heading */
+.use-case-icon {
+  font-size: 2.1rem;
+  margin-bottom: 1rem;
+  color: var(--primary);
+}
+.use-case-card h3 {
+  font-size: 1.16rem;
+  margin-bottom: 0.7rem;
+  color: #dde2fc;
+}
+/* Unstyled list for use case features */
+.use-case-list {
+  list-style: none;
+}
+.use-case-list li {
+  color: #aeb4d5;
+  font-size: 0.99rem;
+  padding: 0.7rem 0 0.7rem 2rem;
+  position: relative;
+}
+.use-case-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0.4rem;
+  color: var(--success);
+  font-weight: bold;
+}
+
+/* ====== FEATURES TABLE ====== */
+/* Section background to separate visually */
+.features-section {
+  padding: 5rem 1rem 4rem;
+  background: linear-gradient(180deg, #21244e 10%, #1a1d33 100%);
+}
+.features-table {
+  max-width: 880px;
+  margin: 3rem auto 0;
+  background: rgba(36, 39, 74, 0.85);
+  border-radius: 18px;
+  border: 1px solid #303354;
+  box-shadow: 0 6px 32px rgba(99, 102, 241, 0.15);
+  overflow: hidden;
+}
+.feature-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.3rem 1.3rem;
+  border-bottom: 1px solid #303354;
+  color: #d1d5ff;
+  transition: background 0.23s ease, box-shadow 0.27s ease, transform 0.25s ease;
+  position: relative;
+}
+.feature-row:last-child {
+  border-bottom: none;
+}
+.feature-row:hover {
+  background: rgba(99, 102, 241, 0.08);
+  box-shadow: 0 18px 40px rgba(99, 102, 241, 0.3);
+  transform: translateY(-4px);
+  cursor: pointer;
+  z-index: 10;
+}
+.feature-name {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  font-weight: 700;
+  font-size: 1.22rem;
+  color: #c7ceff;
+  transition: color 0.3s ease;
+}
+.feature-name i {
+  font-size: 1.6rem;
+  color: var(--secondary);
+  transition: color 0.3s ease;
+}
+.feature-row:hover .feature-name,
+.feature-name:hover {
+  color: var(--primary);
+}
+.feature-desc {
+  color: #aeb4d5;
+  font-size: 1rem;
+  line-height: 1.6;
+  padding-left: 2.84rem; /* aligns nicely under icon */
+}
+
+/* ====== ENTRANCE ANIMATIONS ====== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes entryFadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ====== IMAGE & CANVAS RESPONSIVENESS ====== */
+img, canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ====== RESPONSIVE MOBILE ADAPTATIONS ====== */
+/* At 1099px and below */
+@media (max-width: 1099px) {
+  .hero-container {
+    max-width: 99vw;
+  }
+  .features-table, .section-container {
+    padding: 0;
+  }
+}
+
+/* At 1024px and below: stack key horizontal containers vertically */
+@media (max-width: 1024px) {
+  .hero-container,
+  .team-grid,
+  .use-case-grid {
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .section-container {
+    padding: 0;
+  }
+  .hero-title {
+    font-size: 2rem;
+  }
+  .hero-buttons {
+    flex-direction: column;
+  }
+  .feature-row {
+    flex-direction: column;
+  }
+}
+
+/* At 780px and below: reduce font sizes and adjust card sizes */
+@media (max-width: 780px) {
+  .hero-title {
+    font-size: 1.3rem;
+  }
+  .hero-subtitle {
+    font-size: 0.97rem;
+  }
+  .stat-item h3 {
+    font-size: 1.08rem;
+  }
+  .hero-visual {
+    min-height: 160px;
+  }
+  .team-photo {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+  .features-table {
+    max-width: 100vw;
+  }
+  .section-title {
+    font-size: 0.96rem;
+  }
+  .btn-primary,
+  .btn-secondary {
+    min-width: unset;
+  }
+}
+
+/* Extra small screens adjustments */
+@media (max-width: 490px) {
+  .hero {
+    padding: 2rem 0.2rem;
+  }
+}
+/* Container for WiFi and Bluetooth buttons - remove if you want no container */
+/* Just target buttons directly if no wrapper needed */
+
+/* Basic Styling for buttons to avoid white background */
+.status-btn {
+  background: transparent; /* No white background */
+  border: 1.5px solid var(--primary); /* subtle border to show shape */
+  border-radius: 8px;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--primary); /* primary brand color */
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  font-size: 1.05rem;
+}
+
+.status-btn:hover,
+.status-btn:focus {
+  background-color: rgba(99, 102, 241, 0.15); /* subtle highlight on hover/focus */
+  border-color: var(--secondary);
+  color: var(--secondary);
+  outline: none;
+}
+
+/* Remove any extra container styles if present */
+.connection-status {
+  background: transparent !important; /* make container transparent */
+  padding: 0; /* remove padding */
+  display: flex;
+  gap: 0.6rem; /* spacing between buttons only */
+}
+
+/* Small circle status dots */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--success);
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  transition: background-color 0.3s ease;
+}
+
+/* If the dot is inactive, you can define a low opacity or alternate color */
+.status-dot.inactive {
+  background-color: #444c6d; /* dimmed dot */
+  border-color: transparent;
+}
+
+/* Font awesome icons icon size */
+.status-btn i {
+  font-size: 1.15rem;
+}
+
+/* Optional: Remove any container box shadows or borders */
+#navbar .nav-right {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+
+/* ====== UTILITY CLASSES ====== */
+/* Hide and visible helpers for JS or other usage */
+.hide {
+  display: none !important;
+}
+.visible {
+  display: block !important;
+}
