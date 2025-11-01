@@ -422,6 +422,20 @@ class LiveECGMonitor extends ECGRenderer {
       this.currentBPM = data.heartRate;
       this.updateUI();
     }
+
+      // Also record each sample for a full-trace export if the app requests it
+      try {
+        if (typeof window.recordECGSample === 'function') {
+          window.recordECGSample(data);
+        } else if (typeof window.isRecording !== 'undefined' && window.isRecording) {
+          // fallback: push into global patientData if available
+          if (window.patientData && Array.isArray(window.patientData.ecgData)) {
+            window.patientData.ecgData.push(data);
+          }
+        }
+      } catch (e) {
+        // ignore recording errors
+      }
     
     // Adaptive R-peak detection using rolling peak maximum
     const absVal = Math.abs(data.value);

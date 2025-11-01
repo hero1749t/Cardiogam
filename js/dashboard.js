@@ -118,6 +118,10 @@ function startECGTest() {
     }
     
     console.log('▶️ Starting 30-Second ECG Test');
+    // Clear any previous recording and mark recording flag
+    patientData.ecgData = [];
+    window.isRecording = true;
+
     showStep(STEPS.ECG_TEST);
     
     // Initialize ECG canvas
@@ -168,15 +172,68 @@ function completeECGTest() {
     // Generate report
     generateReport();
     
-    // Show results
+    // Stop recording and render full ECG curve
+    window.isRecording = false;
+
+    // Render full recorded ECG onto report canvas
     setTimeout(() => {
+        renderFullECGReport();
         showStep(STEPS.RESULTS);
-        
-        // Initialize report ECG canvas
-        if (typeof initReportECG === 'function') {
-            initReportECG();
-        }
-    }, 500);
+    }, 250);
+}
+
+// Render full recorded ECG data (patientData.ecgData) onto reportEcgCanvas
+function renderFullECGReport() {
+    const canvas = document.getElementById('reportEcgCanvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    // Draw background
+    ctx.fillStyle = '#1a1c2d';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Grid
+    const pixelsPerMM = (window.ECG_CONFIG && window.ECG_CONFIG.gridSize) ? 4 : 4;
+    const gridSize = (window.ECG_CONFIG ? window.ECG_CONFIG.gridSize : 5) * pixelsPerMM;
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.15)';
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x < canvas.width; x += gridSize / 5) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += gridSize / 5) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // Major grid
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.3)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // Draw waveform from patientData.ecgData
+    const data = patientData.ecgData || [];
+    if (data.length === 0) return;
+
+    // Determine y scale: use liveECG if available
+    const yScale = (window.liveECG && window.liveECG.yScale) ? window.liveECG.yScale : 50;
+    const centerY = canvas.height / 2;
+
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < data.length; i++) {
+        const x = (i / (data.length - 1)) * canvas.width;
+        const y = centerY - (data[i].value * yScale);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
 }
 
 // ========== STEP 4: GENERATE REPORT ==========
