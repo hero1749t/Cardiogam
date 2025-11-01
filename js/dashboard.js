@@ -321,3 +321,11 @@ window.downloadReport = downloadReport;
 window.sendToDoctor = sendToDoctor;
 window.closeDoctorModal = closeDoctorModal;
 window.startNewTest = startNewTest;
+// Allow other modules (e.g., bluetooth.js) to mark device connection state
+window.setDeviceConnected = function(connected) {
+    patientData.deviceConnected = !!connected;
+    const bleBtn = document.getElementById('bleBtn');
+    if (bleBtn) {
+        if (connected) bleBtn.classList.add('connected'); else bleBtn.classList.remove('connected');
+    }
+};

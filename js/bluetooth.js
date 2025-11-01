@@ -175,7 +175,12 @@ function useDemoMode() {
     setTimeout(() => {
         showSuccess('Demo Device (Simulated)');
         updateNavbarStatus(true);
-        
+
+        // Mark device connected in dashboard state (if available)
+        if (typeof window.setDeviceConnected === 'function') {
+            window.setDeviceConnected(true);
+        }
+
         // Start sending random heart rate data
         startDemoDataStream();
     }, 1000);
@@ -274,6 +279,10 @@ function stopDemoDataStream() {
         demoDataInterval = null;
         demoTime = 0;
         console.log('⏹️ Demo data stream stopped');
+    }
+    // Mark device disconnected in dashboard state (if available)
+    if (typeof window.setDeviceConnected === 'function') {
+        window.setDeviceConnected(false);
     }
 }
     // Send random heart rate every 1 second
