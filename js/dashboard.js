@@ -248,6 +248,16 @@ function closeDoctorModal() {
 function startNewTest() {
     console.log('🔄 Starting New Test');
     
+    // Stop demo data if running
+    if (typeof stopDemoDataStream === 'function') {
+        stopDemoDataStream();
+    }
+    
+    // Disconnect real device
+    if (typeof disconnectDevice === 'function') {
+        disconnectDevice();
+    }
+    
     // Reset data
     patientData = {
         name: '',
@@ -266,6 +276,7 @@ function startNewTest() {
     // Go back to step 1
     showStep(STEPS.USER_DETAILS);
 }
+
 
 // ========== DOCTOR EMAIL FORM ==========
 function initDoctorForm() {

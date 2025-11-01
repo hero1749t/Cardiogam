@@ -122,63 +122,83 @@
                 </form>
             </div>
         </section>
+<!-- STEP 2: DEVICE CONNECTION -->
+<section id="step-device-connect" class="step-section">
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-number">Step 2</div>
+            <h2>Connect ECG Device</h2>
+            <p>Choose your connection method</p>
+        </div>
 
-        <!-- STEP 2: DEVICE CONNECTION -->
-        <section id="step-device-connect" class="step-section">
-            <div class="step-card">
-                <div class="step-header">
-                    <div class="step-number">Step 2</div>
-                    <h2>Connect ECG Device</h2>
-                    <p>Please connect your ECG device via Bluetooth or USB</p>
+        <!-- Connection Method Cards -->
+        <div class="connection-options">
+            <!-- Bluetooth Option -->
+            <div class="connection-card">
+                <div class="connection-icon">
+                    <i class="fab fa-bluetooth-b"></i>
                 </div>
+                <h3>Bluetooth (Recommended)</h3>
+                <p>Fast wireless connection</p>
+                <button class="btn-primary" onclick="quickConnectBLE()">
+                    <i class="fas fa-bluetooth-b"></i>
+                    Connect via Bluetooth
+                </button>
+            </div>
 
-                <div class="connection-options">
-                    <div class="connection-card" id="bleConnect">
-                        <div class="connection-icon">
-                            <i class="fab fa-bluetooth-b"></i>
-                        </div>
-                        <h3>Bluetooth (BLE)</h3>
-                        <p>Connect wirelessly via Bluetooth Low Energy</p>
-                        <button class="btn-primary" onclick="connectBLE()">
-                            <i class="fas fa-signal"></i>
-                            Connect via Bluetooth
-                        </button>
-                    </div>
-
-                    <div class="connection-card" id="usbConnect">
-                        <div class="connection-icon">
-                            <i class="fas fa-usb"></i>
-                        </div>
-                        <h3>USB Connection</h3>
-                        <p>Connect using USB cable</p>
-                        <button class="btn-secondary" onclick="connectUSB()">
-                            <i class="fas fa-plug"></i>
-                            Connect via USB
-                        </button>
-                    </div>
+            <!-- Demo Mode Option -->
+            <div class="connection-card">
+                <div class="connection-icon">
+                    <i class="fas fa-flask"></i>
                 </div>
+                <h3>Demo Mode</h3>
+                <p>Test with simulated data</p>
+                <button class="btn-secondary" onclick="useDemoMode()">
+                    <i class="fas fa-play"></i>
+                    Use Demo Mode
+                </button>
+            </div>
+        </div>
 
-                <div id="connectionStatus" class="connection-status-box" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Searching for devices...</p>
+        <!-- Connection Status (Hidden initially) -->
+        <div id="connectionStatus" class="connection-status-box" style="display: none;">
+            <div class="spinner"></div>
+            <p id="statusMessage">Connecting...</p>
+        </div>
+
+        <!-- Success Screen -->
+        <div id="deviceConnected" class="device-success" style="display: none;">
+            <div class="success-animation">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Connected Successfully!</h3>
+            <div class="device-details-box">
+                <div class="detail-item">
+                    <span class="detail-label">Device</span>
+                    <span class="detail-value" id="deviceName">ECG Monitor</span>
                 </div>
-
-                <div id="deviceConnected" class="device-info" style="display: none;">
-                    <div class="success-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h3>Device Connected Successfully!</h3>
-                    <p>Device: <strong id="deviceName">nRF52840 ECG Monitor</strong></p>
-                    <p>Signal Strength: <strong id="signalStrength">Excellent</strong></p>
-                    
-                    <button class="btn-success btn-large" onclick="startECGTest()">
-                        <i class="fas fa-play"></i>
-                        Start 30-Second ECG Test
-                    </button>
+                <div class="detail-item">
+                    <span class="detail-label">Signal</span>
+                    <span class="detail-value signal-strength">
+                        <i class="fas fa-signal"></i>
+                        <span id="signalStrength">Excellent</span>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value status-ready">
+                        <i class="fas fa-check"></i> Ready
+                    </span>
                 </div>
             </div>
-        </section>
-
+            
+            <button class="btn-success btn-large" onclick="startECGTest()">
+                <i class="fas fa-heartbeat"></i>
+                Start 30-Second Test
+            </button>
+        </div>
+    </div>
+</section>
         <!-- STEP 3: ECG TEST (30 SECONDS) -->
         <section id="step-ecg-test" class="step-section">
             <div class="step-card full-width">

@@ -548,3 +548,16 @@ window.stopLiveECG = stopLiveECG;
 window.initReportECG = initReportECG;
 window.switchToRealDevice = switchToRealDevice;
 window.switchToSimulated = switchToSimulated;
+// ========== DEMO MODE DATA HANDLER ==========
+window.onDemoECGData = function(data) {
+    // Send demo data to active ECG renderers
+    if (liveECG && liveECG.isRunning) {
+        liveECG.dataManager.source.notify(data);
+    }
+    
+    if (heroECG && heroECG.isRunning) {
+        heroECG.dataManager.source.notify(data);
+    }
+};
+
+console.log('✅ Demo mode handler registered');

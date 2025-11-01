@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0e1a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: #1a1d2e;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #6366f1;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 1rem;
+        }
+        button:hover {
+            background: #4f46e5;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.5);
+        }
+        #result {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #0f1419;
+            border-radius: 10px;
+            min-height: 100px;
+            font-family: monospace;
+            text-align: left;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #60a5fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔵 Bluetooth Test</h1>
+        <p>Click button to scan for nearby Bluetooth devices</p>
+        
+        <button onclick="scanDevices()">
+            🔍 Scan Bluetooth Devices
+        </button>
+        
+        <button onclick="checkSupport()">
+            ✅ Check Browser Support
+        </button>
+        
+        <button onclick="clearLog()">
+            🗑️ Clear Log
+        </button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const resultDiv = document.getElementById('result');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            resultDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            resultDiv.scrollTop = resultDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            resultDiv.innerHTML = '';
+            log('Log cleared', 'info');
+        }
+
+        function checkSupport() {
+            log('Checking Bluetooth support...', 'info');
+            
+            if (navigator.bluetooth) {
+                log('✅ Web Bluetooth API is SUPPORTED!', 'success');
+                log('Browser: ' + navigator.userAgent.split(' ').pop(), 'info');
+            } else {
+                log('❌ Web Bluetooth API NOT supported', 'error');
+                log('Please use Chrome, Edge, or Opera', 'error');
+            }
+        }
+
+        async function scanDevices() {
+            log('Starting Bluetooth scan...', 'info');
+            
+            if (!navigator.bluetooth) {
+                log('❌ Bluetooth not supported!', 'error');
+                alert('⚠️ Your browser does not support Bluetooth!\n\nSupported browsers:\n- Chrome 56+\n- Edge 79+\n- Opera 43+');
+                return;
+            }
+
+            try {
+                log('Opening device picker...', 'info');
+                
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['heart_rate', 'battery_service']
+                });
+
+                log('✅ Device selected!', 'success');
+                log('Device Name: ' + (device.name || 'Unknown'), 'success');
+                log('Device ID: ' + device.id, 'info');
+                
+                // Try to connect
+                log('Attempting to connect...', 'info');
+                const server = await device.gatt.connect();
+                log('✅ Connected to GATT server!', 'success');
+                
+                log('Getting services...', 'info');
+                const services = await server.getPrimaryServices();
+                log(`Found ${services.length} service(s)`, 'success');
+                
+                services.forEach((service, index) => {
+                    log(`Service ${index + 1}: ${service.uuid}`, 'info');
+                });
+
+            } catch (error) {
+                if (error.name === 'NotFoundError') {
+                    log('❌ No device selected (cancelled)', 'error');
+                } else {
+                    log('❌ Error: ' + error.message, 'error');
+                    console.error(error);
+                }
+            }
+        }
+
+        // Auto-check on load
+        window.onload = () => {
+            log('🔵 Bluetooth Test Ready', 'success');
+            checkSupport();
+        };
+    </script>
+</body>
+</html>
+```
