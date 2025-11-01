@@ -181,6 +181,11 @@ function useDemoMode() {
             window.setDeviceConnected(true);
         }
 
+        // Ensure ECG renderer is in simulated (advanced) mode so waveform matches demo
+        if (typeof window.switchToSimulated === 'function') {
+            window.switchToSimulated();
+        }
+
         // Start sending random heart rate data
         startDemoDataStream();
     }, 1000);
