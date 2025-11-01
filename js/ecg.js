@@ -72,44 +72,54 @@ class SimulatedECGSource extends ECGDataSource {
 
   // Generate realistic ECG waveform (P-QRS-T complex)
   generatePoint(t) {
+    // More detailed ECG synthesis using Gaussian-shaped R-peak and smaller waves
     const beatPosition = (t % this.beatInterval) / this.beatInterval;
     let value = 0;
 
-    // P wave (atrial depolarization)
-    if (beatPosition >= 0.05 && beatPosition < 0.15) {
-      const pWavePos = (beatPosition - 0.05) / 0.1;
-      value = 0.15 * Math.sin(pWavePos * Math.PI);
-    }
-    // PR segment
-    else if (beatPosition >= 0.15 && beatPosition < 0.25) {
-      value = 0;
-    }
-    // QRS complex
-    else if (beatPosition >= 0.25 && beatPosition < 0.35) {
-      const qrsPos = (beatPosition - 0.25) / 0.1;
-      if (qrsPos < 0.2) {
-        value = -0.1 * (qrsPos / 0.2);
-      } else if (qrsPos < 0.5) {
-        value = 1.2 * Math.sin((qrsPos - 0.2) / 0.3 * Math.PI);
-      } else {
-        value = -0.3 * Math.sin((qrsPos - 0.5) / 0.5 * Math.PI);
-      }
-    }
-    // ST segment
-    else if (beatPosition >= 0.35 && beatPosition < 0.45) {
-      value = 0.05;
-    }
-    // T wave
-    else if (beatPosition >= 0.45 && beatPosition < 0.70) {
-      const tWavePos = (beatPosition - 0.45) / 0.25;
-      value = 0.25 * Math.sin(tWavePos * Math.PI);
+    // Baseline wander (low-frequency) to mimic respiration/placement
+    const baseline = Math.sin(t * 0.2) * 0.02; // slow 0.2 Hz-ish
+
+    // P wave (small, wide)
+    if (beatPosition >= 0.04 && beatPosition < 0.12) {
+      const x = (beatPosition - 0.04) / 0.08; // 0..1
+      value += 0.08 * Math.sin(Math.PI * x);
     }
 
-    // Add realistic artifacts
-    value += Math.sin(t * 0.5) * 0.02; // Respiratory
-    value += (Math.random() - 0.5) * 0.01; // Noise
+    // PR segment (flat)
 
-    return value;
+    // QRS complex: model with a narrow, tall R peak using gaussian
+    if (beatPosition >= 0.22 && beatPosition < 0.38) {
+      const center = 0.30; // center of QRS in beatPosition
+      const sigma = 0.015; // narrow width
+      const gauss = Math.exp(-Math.pow((beatPosition - center), 2) / (2 * sigma * sigma));
+      // Combine small negative Q and S around R
+      const qWave = -0.06 * Math.exp(-Math.pow((beatPosition - 0.255), 2) / (2 * 0.006 * 0.006));
+      const rWave = 1.0 * gauss; // main R amplitude
+      const sWave = -0.18 * Math.exp(-Math.pow((beatPosition - 0.34), 2) / (2 * 0.008 * 0.008));
+      value += qWave + rWave + sWave;
+    }
+
+    // ST segment (small elevation/depression)
+    if (beatPosition >= 0.38 && beatPosition < 0.46) {
+      value += 0.02 * Math.sin((beatPosition - 0.38) / 0.08 * Math.PI);
+    }
+
+    // T wave (broader)
+    if (beatPosition >= 0.46 && beatPosition < 0.72) {
+      const x = (beatPosition - 0.46) / 0.26;
+      value += 0.25 * Math.sin(Math.PI * x) * 0.8;
+    }
+
+    // occasional ectopic beat (rare) — adds a premature spike
+    if (Math.random() < 0.001) {
+      value += 0.6 * Math.exp(-Math.pow((Math.random() - 0.5), 2) / 0.01);
+    }
+
+    // Add realistic artifacts/noise
+    const respiratory = Math.sin(t * 0.3) * 0.012; // breathing artifact
+    const noise = (Math.random() - 0.5) * 0.02; // Gaussian-like noise
+
+    return baseline + value + respiratory + noise;
   }
 
   start() {
@@ -392,6 +402,9 @@ class LiveECGMonitor extends ECGRenderer {
     this.heartRateHistory = [];
     this.lastRPeakTime = 0;
     this.currentBPM = 72;
+    // Rolling peak tracker to detect R-peaks adaptively
+    this._peakMax = 0;
+    this._peakDecay = 0.995;
   }
 
   onDataReceived(data) {
@@ -403,26 +416,25 @@ class LiveECGMonitor extends ECGRenderer {
       this.updateUI();
     }
     
-    // Detect R-peaks for real-time BPM
-    if (data.value > 0.9) {
-      const currentTime = Date.now();
-      
+    // Adaptive R-peak detection using rolling peak maximum
+    const absVal = Math.abs(data.value);
+    this._peakMax = Math.max(this._peakMax * this._peakDecay, absVal);
+
+    // Trigger when signal crosses a fraction of rolling peak (and debounce one beat)
+    const threshold = Math.max(0.5, this._peakMax * 0.6);
+    const currentTime = Date.now();
+    if (absVal > threshold && (currentTime - this.lastRPeakTime) > 250) { // >250ms between peaks
       if (this.lastRPeakTime > 0) {
         const interval = (currentTime - this.lastRPeakTime) / 1000;
         const bpm = Math.round(60 / interval);
-        
-        if (bpm >= 40 && bpm <= 200) {
+
+        if (bpm >= 30 && bpm <= 220) {
           this.currentBPM = bpm;
           this.heartRateHistory.push(bpm);
-          
-          if (this.heartRateHistory.length > 10) {
-            this.heartRateHistory.shift();
-          }
-          
+          if (this.heartRateHistory.length > 12) this.heartRateHistory.shift();
           this.updateUI();
         }
       }
-      
       this.lastRPeakTime = currentTime;
     }
   }
