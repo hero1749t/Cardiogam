@@ -195,26 +195,55 @@ function renderFullECGReport() {
     ctx.fillStyle = '#1a1c2d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Grid
-    const pixelsPerMM = (window.ECG_CONFIG && window.ECG_CONFIG.gridSize) ? 4 : 4;
-    const gridSize = (window.ECG_CONFIG ? window.ECG_CONFIG.gridSize : 5) * pixelsPerMM;
-    ctx.strokeStyle = 'rgba(99, 102, 241, 0.15)';
+    // Grid and physical scaling
+    const sampleRate = (window.ECG_CONFIG && window.ECG_CONFIG.sampleRate) ? window.ECG_CONFIG.sampleRate : 250; // Hz
+    const speedMMperSec = (window.ECG_CONFIG && window.ECG_CONFIG.speed) ? window.ECG_CONFIG.speed : 25; // mm/s
+    const desiredPixelsPerMM = 4; // visual density: 4px per mm (tweak for clarity)
+
+    const samples = patientData.ecgData || [];
+    const totalSamples = samples.length;
+    const totalSeconds = totalSamples / sampleRate;
+    const totalMM = totalSeconds * speedMMperSec;
+    const requiredPx = totalMM * desiredPixelsPerMM;
+
+    // If required pixels exceed canvas width, compress horizontally to fit
+    const scale = requiredPx > canvas.width && requiredPx > 0 ? canvas.width / requiredPx : 1;
+    const pixelsPerMMDisplay = desiredPixelsPerMM * scale;
+    const gridSize = (window.ECG_CONFIG ? window.ECG_CONFIG.gridSize : 5) * pixelsPerMMDisplay;
+
+    // Draw fine grid (minor) and major grid
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.12)';
     ctx.lineWidth = 0.5;
     for (let x = 0; x < canvas.width; x += gridSize / 5) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, canvas.height); ctx.stroke();
     }
     for (let y = 0; y < canvas.height; y += gridSize / 5) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(canvas.width, y + 0.5); ctx.stroke();
     }
 
-    // Major grid
-    ctx.strokeStyle = 'rgba(99, 102, 241, 0.3)';
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.28)';
     ctx.lineWidth = 1;
     for (let x = 0; x < canvas.width; x += gridSize) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, canvas.height); ctx.stroke();
     }
     for (let y = 0; y < canvas.height; y += gridSize) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(canvas.width, y + 0.5); ctx.stroke();
+    }
+
+    // Time markers: draw 1-second ticks (25 mm per second) scaled
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const pxPerSecond = speedMMperSec * pixelsPerMMDisplay;
+    if (pxPerSecond > 5) {
+        for (let s = 0; s <= Math.ceil(totalSeconds); s++) {
+            const x = Math.round(s * pxPerSecond);
+            if (x >= 0 && x <= canvas.width) {
+                ctx.beginPath(); ctx.moveTo(x + 0.5, canvas.height - 12); ctx.lineTo(x + 0.5, canvas.height); ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1; ctx.stroke();
+                ctx.fillText(s + 's', x, canvas.height - 12);
+            }
+        }
     }
 
     // Draw waveform from patientData.ecgData
