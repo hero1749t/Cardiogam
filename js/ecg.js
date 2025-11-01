@@ -125,23 +125,24 @@ class SimulatedECGSource extends ECGDataSource {
   start() {
     console.log('📊 Simulated ECG Source Started');
     
-    // Generate data at ~60 FPS
+    // Generate data at configured sample rate (e.g., 250 Hz)
+    const intervalMs = Math.round(1000 / ECG_CONFIG.sampleRate);
     this.interval = setInterval(() => {
       const value = this.generatePoint(this.time);
       this.time += 1 / ECG_CONFIG.sampleRate;
-      
+
       this.dataBuffer.push(value);
       if (this.dataBuffer.length > this.maxBufferSize) {
         this.dataBuffer.shift();
       }
-      
-      // Notify listeners
+
+      // Notify listeners with one sample
       this.notify({
         value: value,
         timestamp: Date.now(),
         heartRate: this.heartRate
       });
-    }, 1000 / 60); // 60 FPS
+    }, intervalMs);
   }
 
   stop() {
@@ -276,12 +277,18 @@ class ECGRenderer {
     
     this.ctx = this.canvas.getContext('2d');
     this.dataManager = dataManager || new ECGDataManager();
-    this.xPosition = 0;
-    this.yScale = 50;
-    this.xSpeed = 2;
+  this.xPosition = 0;
+  this.yScale = 50; // pixels per mV baseline scale (tunable)
+
+  // Compute pixel scaling: pixels per mm and grid size
+  this.pixelsPerMM = 4; // default; visual density (increase for tighter grid)
+  this.gridSize = ECG_CONFIG.gridSize * this.pixelsPerMM; // px per major grid
+
+  // Compute xSpeed in pixels per sample: speed(mm/s) * pixelsPerMM / sampleRate
+  this.xSpeed = (ECG_CONFIG.speed * this.pixelsPerMM) / ECG_CONFIG.sampleRate; // px per sample
     this.isRunning = false;
     
-    this.initCanvas();
+  this.initCanvas();
     
     // Subscribe to data updates
     this.dataManager.subscribe((data) => this.onDataReceived(data));
@@ -294,8 +301,8 @@ class ECGRenderer {
   }
 
   drawGrid() {
-    const { width, height } = this.canvas;
-    const gridSize = 20;
+  const { width, height } = this.canvas;
+  const gridSize = this.gridSize;
     
     this.ctx.fillStyle = ECG_CONFIG.colors.background;
     this.ctx.fillRect(0, 0, width, height);
