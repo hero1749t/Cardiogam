@@ -246,13 +246,36 @@ function renderFullECGReport() {
         }
     }
 
+    // Vertical mV ticks and labels (standard: 10 mm = 1 mV)
+    const centerY = canvas.height / 2;
+    const mmPerMV = 10; // 10 mm per 1 mV is standard ECG scaling
+    const pxPerMV = pixelsPerMMDisplay * mmPerMV;
+    ctx.fillStyle = '#cbd5e1';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.font = '12px Inter, sans-serif';
+
+    // Draw thicker horizontal lines and labels at each 1 mV step
+    const maxSteps = Math.floor((canvas.height / 2) / pxPerMV);
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    for (let m = -maxSteps; m <= maxSteps; m++) {
+        const y = Math.round(centerY - m * pxPerMV) + 0.5;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        // Label whole mV steps (skip label at 0 to avoid clutter if desired)
+        if (m !== 0) {
+            ctx.fillText((m > 0 ? '+' : '') + m + ' mV', 45, y);
+        } else {
+            ctx.fillText('0 mV', 45, y);
+        }
+    }
+
     // Draw waveform from patientData.ecgData
     const data = patientData.ecgData || [];
     if (data.length === 0) return;
 
     // Determine y scale: use liveECG if available
     const yScale = (window.liveECG && window.liveECG.yScale) ? window.liveECG.yScale : 50;
-    const centerY = canvas.height / 2;
 
     ctx.strokeStyle = '#10b981';
     ctx.lineWidth = 1.5;
