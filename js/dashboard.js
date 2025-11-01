@@ -204,12 +204,21 @@ function renderFullECGReport() {
     const totalSamples = samples.length;
     const totalSeconds = totalSamples / sampleRate;
     const totalMM = totalSeconds * speedMMperSec;
-    const requiredPx = totalMM * desiredPixelsPerMM;
+    const requiredPx = Math.max(100, Math.round(totalMM * desiredPixelsPerMM));
 
-    // If required pixels exceed canvas width, compress horizontally to fit
-    const scale = requiredPx > canvas.width && requiredPx > 0 ? canvas.width / requiredPx : 1;
-    const pixelsPerMMDisplay = desiredPixelsPerMM * scale;
+    // Attempt to render at true physical scale by widening canvas and enabling horizontal scroll.
+    const MAX_CANVAS_PX = 20000; // safety cap to avoid extremely large canvases
+    const finalCanvasPx = Math.min(requiredPx, MAX_CANVAS_PX);
+
+    // pixels per mm displayed (might be reduced if we had to cap canvas width)
+    const pixelsPerMMDisplay = requiredPx > MAX_CANVAS_PX ? (MAX_CANVAS_PX / (totalMM || 1)) : desiredPixelsPerMM;
     const gridSize = (window.ECG_CONFIG ? window.ECG_CONFIG.gridSize : 5) * pixelsPerMMDisplay;
+
+    // Resize canvas to the computed width and keep its visual width so wrapper can scroll
+    const wrapper = document.getElementById('reportCanvasWrapper');
+    canvas.width = finalCanvasPx;
+    canvas.style.width = finalCanvasPx + 'px';
+    canvas.height = canvas.offsetHeight;
 
     // Draw fine grid (minor) and major grid
     ctx.strokeStyle = 'rgba(99, 102, 241, 0.12)';
@@ -270,7 +279,7 @@ function renderFullECGReport() {
         }
     }
 
-    // Draw waveform from patientData.ecgData
+    // Draw waveform from patientData.ecgData at true time scale
     const data = patientData.ecgData || [];
     if (data.length === 0) return;
 
@@ -280,8 +289,9 @@ function renderFullECGReport() {
     ctx.strokeStyle = '#10b981';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
+    const pxPerSample = pxPerSecond / sampleRate;
     for (let i = 0; i < data.length; i++) {
-        const x = (i / (data.length - 1)) * canvas.width;
+        const x = Math.round(i * pxPerSample);
         const y = centerY - (data[i].value * yScale);
         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }

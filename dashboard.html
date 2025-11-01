@@ -322,7 +322,9 @@
                 <!-- ECG Preview -->
                 <div class="report-preview">
                     <h3>ECG Waveform</h3>
-                    <canvas id="reportEcgCanvas"></canvas>
+                    <div id="reportCanvasWrapper" style="overflow-x:auto; border:1px solid rgba(255,255,255,0.04);">
+                        <canvas id="reportEcgCanvas" style="display:block;"></canvas>
+                    </div>
                 </div>
 
                 <!-- Patient Info Summary -->
