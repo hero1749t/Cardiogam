@@ -14,6 +14,7 @@
     <!-- CSS Files -->
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/report.css">
 </head>
 <body>
     <!-- NAVBAR -->
@@ -276,45 +277,107 @@
                     <p>Your ECG report has been generated successfully</p>
                 </div>
 
-                <!-- Report Summary -->
+                <!-- Professional ECG Report -->
                 <div class="report-summary">
-                    <div class="result-status success">
-                        <i class="fas fa-check-circle"></i>
-                        <h3>Test Completed Successfully</h3>
+                    <div class="report-header">
+                        <div class="hospital-info">
+                            <h2>ECG Report</h2>
+                            <p class="report-id">Report ID: <span id="reportId">-</span></p>
+                            <p class="test-datetime">Test Date & Time: <span id="testDateTime">-</span></p>
+                        </div>
+                        <div class="quality-indicator success">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="qualityStatus">High Quality Recording</span>
+                        </div>
                     </div>
 
-                    <div class="results-grid">
-                        <div class="result-card">
-                            <div class="result-icon">
-                                <i class="fas fa-heartbeat"></i>
-                            </div>
-                            <div class="result-info">
-                                <span class="result-label">Average Heart Rate</span>
-                                <span class="result-value" id="avgHeartRate">72 BPM</span>
-                                <span class="result-status-text normal">Normal</span>
-                            </div>
-                        </div>
-
-                        <div class="result-card">
-                            <div class="result-icon">
-                                <i class="fas fa-wave-square"></i>
-                            </div>
-                            <div class="result-info">
-                                <span class="result-label">Rhythm Analysis</span>
-                                <span class="result-value" id="rhythmStatus">Regular Sinus</span>
-                                <span class="result-status-text normal">Normal</span>
+                    <!-- Key Measurements -->
+                    <div class="measurements-grid">
+                        <div class="measurement-section">
+                            <h3>Cardiac Rhythm</h3>
+                            <div class="measurement-row">
+                                <div class="measurement-item">
+                                    <span class="measure-label">Heart Rate</span>
+                                    <span class="measure-value" id="avgHeartRate">72</span>
+                                    <span class="measure-unit">BPM</span>
+                                    <span class="measure-status normal" id="hrStatus">Normal</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span class="measure-label">Rhythm</span>
+                                    <span class="measure-value" id="rhythmStatus">Sinus</span>
+                                    <span class="measure-status normal" id="rhythmStatusIndicator">Normal</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="result-card">
-                            <div class="result-icon">
-                                <i class="fas fa-signal"></i>
+                        <div class="measurement-section">
+                            <h3>Intervals</h3>
+                            <div class="measurement-row">
+                                <div class="measurement-item">
+                                    <span class="measure-label">PR Interval</span>
+                                    <span class="measure-value" id="prInterval">160</span>
+                                    <span class="measure-unit">ms</span>
+                                    <span class="measure-status normal" id="prStatus">Normal</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span class="measure-label">QRS Duration</span>
+                                    <span class="measure-value" id="qrsDuration">90</span>
+                                    <span class="measure-unit">ms</span>
+                                    <span class="measure-status normal" id="qrsStatus">Normal</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span class="measure-label">QT/QTc</span>
+                                    <span class="measure-value" id="qtInterval">380/410</span>
+                                    <span class="measure-unit">ms</span>
+                                    <span class="measure-status normal" id="qtStatus">Normal</span>
+                                </div>
                             </div>
-                            <div class="result-info">
-                                <span class="result-label">Signal Quality</span>
-                                <span class="result-value" id="finalSignalQuality">Excellent</span>
-                                <span class="result-status-text normal">98%</span>
+                        </div>
+
+                        <div class="measurement-section">
+                            <h3>Axes</h3>
+                            <div class="measurement-row">
+                                <div class="measurement-item">
+                                    <span class="measure-label">P Axis</span>
+                                    <span class="measure-value" id="pAxis">45</span>
+                                    <span class="measure-unit">°</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span class="measure-label">QRS Axis</span>
+                                    <span class="measure-value" id="qrsAxis">30</span>
+                                    <span class="measure-unit">°</span>
+                                </div>
+                                <div class="measurement-item">
+                                    <span class="measure-label">T Axis</span>
+                                    <span class="measure-value" id="tAxis">40</span>
+                                    <span class="measure-unit">°</span>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Metrics -->
+                    <div class="quality-metrics">
+                        <div class="quality-item">
+                            <span class="quality-label">Signal Quality</span>
+                            <div class="quality-bar">
+                                <div class="quality-fill" id="signalQualityBar" style="width: 98%"></div>
+                            </div>
+                            <span class="quality-value" id="finalSignalQuality">98%</span>
+                        </div>
+                        <div class="quality-item">
+                            <span class="quality-label">Noise Level</span>
+                            <div class="quality-bar">
+                                <div class="quality-fill" id="noiseBar" style="width: 5%"></div>
+                            </div>
+                            <span class="quality-value" id="noiseLevel">5%</span>
+                        </div>
+                        <div class="quality-item">
+                            <span class="quality-label">Baseline Stability</span>
+                            <div class="quality-bar">
+                                <div class="quality-fill" id="baselineBar" style="width: 95%"></div>
+                            </div>
+                            <span class="quality-value" id="baselineStability">95%</span>
                         </div>
                     </div>
                 </div>
@@ -327,25 +390,146 @@
                     </div>
                 </div>
 
-                <!-- Patient Info Summary -->
+                <!-- Patient Information -->
                 <div class="patient-summary">
                     <h3>Patient Information</h3>
                     <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Name:</span>
-                            <span class="info-value" id="summaryName">-</span>
+                        <div class="info-section">
+                            <h4>Demographics</h4>
+                            <div class="info-items">
+                                <div class="info-item">
+                                    <span class="info-label">Name:</span>
+                                    <span class="info-value" id="summaryName">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Age:</span>
+                                    <span class="info-value" id="summaryAge">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Gender:</span>
+                                    <span class="info-value" id="summaryGender">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Phone:</span>
+                                    <span class="info-value" id="summaryPhone">-</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Age:</span>
-                            <span class="info-value" id="summaryAge">-</span>
+                        
+                        <div class="info-section">
+                            <h4>Medical History</h4>
+                            <div class="info-items">
+                                <div class="info-item full-width">
+                                    <span class="info-label">Previous Conditions:</span>
+                                    <span class="info-value" id="medicalHistorySummary">-</span>
+                                </div>
+                                <div class="info-item full-width">
+                                    <span class="info-label">Current Medications:</span>
+                                    <span class="info-value" id="medicationsSummary">-</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Gender:</span>
-                            <span class="info-value" id="summaryGender">-</span>
+
+                        <div class="info-section">
+                            <h4>Test Information</h4>
+                            <div class="info-items">
+                                <div class="info-item">
+                                    <span class="info-label">Test Date:</span>
+                                    <span class="info-value" id="testDate">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Device ID:</span>
+                                    <span class="info-value" id="deviceId">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Test Duration:</span>
+                                    <span class="info-value">30 seconds</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Test Date:</span>
-                            <span class="info-value" id="testDate">-</span>
+                    </div>
+                </div>
+                    </div>
+                </div>
+
+                <!-- Interpretation & Analysis -->
+                <div class="interpretation-section">
+                    <h3>ECG Interpretation</h3>
+                    
+                    <div class="interpretation-grid">
+                        <div class="interpretation-item">
+                            <h4>Primary Analysis</h4>
+                            <ul class="analysis-list" id="primaryAnalysis">
+                                <li class="normal">Normal sinus rhythm</li>
+                                <li class="normal">Normal PR interval</li>
+                                <li class="normal">Normal QRS duration</li>
+                                <li class="normal">Normal QT/QTc interval</li>
+                            </ul>
+                        </div>
+
+                        <div class="interpretation-item">
+                            <h4>Detailed Findings</h4>
+                            <ul class="findings-list" id="detailedFindings">
+                                <li>P waves: Normal morphology and axis</li>
+                                <li>QRS complex: Normal duration and axis</li>
+                                <li>ST segments: No significant elevation or depression</li>
+                                <li>T waves: Normal morphology and axis</li>
+                            </ul>
+                        </div>
+
+                        <div class="interpretation-item full-width">
+                            <h4>Clinical Impression</h4>
+                            <p id="clinicalImpression" class="impression-text">
+                                Normal ECG recording with no significant abnormalities. Regular sinus rhythm with normal conduction intervals and axis measurements. No evidence of ischemic changes or arrhythmia.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Reference Values -->
+                    <div class="reference-values">
+                        <h4>Reference Values</h4>
+                        <table class="ref-table">
+                            <tr>
+                                <th>Measurement</th>
+                                <th>Normal Range</th>
+                                <th>Current Value</th>
+                            </tr>
+                            <tr>
+                                <td>Heart Rate</td>
+                                <td>60-100 BPM</td>
+                                <td id="refHeartRate">72 BPM</td>
+                            </tr>
+                            <tr>
+                                <td>PR Interval</td>
+                                <td>120-200 ms</td>
+                                <td id="refPR">160 ms</td>
+                            </tr>
+                            <tr>
+                                <td>QRS Duration</td>
+                                <td>80-120 ms</td>
+                                <td id="refQRS">90 ms</td>
+                            </tr>
+                            <tr>
+                                <td>QT/QTc</td>
+                                <td>≤ 440 ms</td>
+                                <td id="refQT">380/410 ms</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Doctor's Comments -->
+                <div class="doctor-comments">
+                    <h3>Doctor's Comments</h3>
+                    <div class="comments-box" id="doctorComments" contenteditable="true" data-placeholder="Add your professional interpretation and recommendations here..."></div>
+                    <div class="signature-section">
+                        <div class="doctor-info">
+                            <span class="info-label">Reviewed By:</span>
+                            <span class="info-value" id="doctorName">-</span>
+                        </div>
+                        <div class="doctor-info">
+                            <span class="info-label">Date:</span>
+                            <span class="info-value" id="reviewDate">-</span>
                         </div>
                     </div>
                 </div>
