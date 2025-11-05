@@ -164,22 +164,84 @@ function startTestTimer() {
 function completeECGTest() {
     console.log('✅ ECG Test Completed');
     
-    // Stop ECG rendering
     if (typeof stopLiveECG === 'function') {
         stopLiveECG();
     }
     
-    // Generate report
     generateReport();
     
-    // Stop recording and render full ECG curve
     window.isRecording = false;
 
-    // Render full recorded ECG onto report canvas
     setTimeout(() => {
         renderFullECGReport();
         showStep(STEPS.RESULTS);
+        
+        // Save to database
+        saveSessionToDatabase(); // ADD THIS LINE
     }, 250);
+}
+// ========== SAVE TO DATABASE ==========
+async function saveSessionToDatabase() {
+    const user = await window.authManager.getCurrentUser();
+    
+    if (!user) {
+        console.warn('⚠️ No user logged in, skipping database save');
+        return;
+    }
+
+    const deviceInfo = window.bluetoothManager.getDeviceInfo();
+    const measurements = analyzeECG(patientData.ecgData);
+
+    const sessionData = {
+        user_id: user.id,
+        patient_name: patientData.name,
+        patient_age: parseInt(patientData.age),
+        patient_gender: patientData.gender,
+        patient_phone: patientData.phone,
+        medical_history: patientData.medicalHistory,
+        
+        device_id: deviceInfo?.id,
+        device_name: deviceInfo?.name,
+        connection_type: deviceInfo?.type || 'demo',
+        
+        heart_rate: measurements.heartRate,
+        rhythm: measurements.rhythm,
+        rhythm_normal: measurements.rhythmNormal,
+        pr_interval: measurements.prInterval,
+        qrs_duration: measurements.qrsDuration,
+        qt_interval: measurements.qtQtc,
+        qtc: measurements.qtc,
+        p_axis: measurements.pAxis,
+        qrs_axis: measurements.qrsAxis,
+        t_axis: measurements.tAxis,
+        
+        signal_quality: measurements.signalQuality,
+        noise_level: measurements.noiseLevel,
+        baseline_stability: measurements.baselineStability,
+        
+        ecg_data: patientData.ecgData, // Full waveform
+        
+        arrhythmia_detected: false, // Will implement detection later
+        clinical_impression: document.getElementById('clinicalImpression')?.textContent,
+        
+        status: 'completed',
+        test_duration: 30
+    };
+
+    console.log('💾 Saving session to database...');
+
+    const result = await window.db.saveECGSession(sessionData);
+
+    if (result.success) {
+        console.log('✅ Session saved successfully!');
+        alert('✅ ECG test saved to your account!');
+        
+        // Store session ID for PDF upload later
+        window.currentSessionId = result.data.id;
+    } else {
+        console.error('❌ Failed to save session:', result.error);
+        alert('⚠️ Could not save to database: ' + result.error);
+    }
 }
 
 // Render full recorded ECG data (patientData.ecgData) onto reportEcgCanvas
@@ -884,4 +946,122 @@ window.setDeviceConnected = function(connected) {
     if (bleBtn) {
         if (connected) bleBtn.classList.add('connected'); else bleBtn.classList.remove('connected');
     }
+};
+// ========== DEMO MODE (FIXED) ==========
+window.useDemoMode = function() {
+    console.log('🎮 Demo Mode Activated');
+    
+    const statusBox = document.getElementById('connectionStatus');
+    const connectedBox = document.getElementById('deviceConnected');
+    const deviceNameEl = document.getElementById('deviceName');
+    
+    // Show loading
+    statusBox.style.display = 'block';
+    document.getElementById('statusMessage').textContent = 'Initializing demo mode...';
+    
+    setTimeout(() => {
+        statusBox.style.display = 'none';
+        connectedBox.style.display = 'block';
+        
+        if (deviceNameEl) {
+            deviceNameEl.textContent = 'Demo Device (Simulated)';
+        }
+        
+        // Mark connected
+        patientData.deviceConnected = true;
+        
+        // Update navbar
+        const bleBtn = document.getElementById('bleBtn');
+        if (bleBtn) bleBtn.classList.add('connected');
+        
+        // Switch to simulated ECG mode
+        if (typeof window.switchToSimulated === 'function') {
+            window.switchToSimulated();
+        }
+        
+        console.log('✅ Demo mode ready!');
+    }, 1000);
+};
+
+// ========== BLUETOOTH CONNECT (FIXED) ==========
+window.quickConnectBLE = async function() {
+    console.log('🔵 Bluetooth Connect Initiated');
+    
+    if (!navigator.bluetooth) {
+        alert('❌ Bluetooth not supported!\n\nUse Chrome, Edge, or Opera.\n\nEnable: chrome://flags/#enable-web-bluetooth');
+        return;
+    }
+
+    const statusBox = document.getElementById('connectionStatus');
+    const connectedBox = document.getElementById('deviceConnected');
+    const deviceNameEl = document.getElementById('deviceName');
+    
+    statusBox.style.display = 'block';
+    document.getElementById('statusMessage').textContent = 'Opening Bluetooth picker...';
+
+    try {
+        const device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['heart_rate', 'battery_service']
+        });
+
+        console.log('✅ Device selected:', device.name);
+        
+        document.getElementById('statusMessage').textContent = 'Connecting to device...';
+        
+        const server = await device.gatt.connect();
+        console.log('✅ GATT connected');
+
+        statusBox.style.display = 'none';
+        connectedBox.style.display = 'block';
+        
+        if (deviceNameEl) {
+            deviceNameEl.textContent = device.name || 'BLE Device';
+        }
+        
+        patientData.deviceConnected = true;
+        
+        const bleBtn = document.getElementById('bleBtn');
+        if (bleBtn) bleBtn.classList.add('connected');
+        
+        // Switch to real device mode
+        if (typeof window.switchToRealDevice === 'function') {
+            window.switchToRealDevice();
+        }
+        
+        console.log('✅ Bluetooth connected!');
+
+    } catch (error) {
+        console.error('❌ Connection error:', error);
+        statusBox.style.display = 'none';
+        
+        if (error.name === 'NotFoundError') {
+            console.log('User cancelled');
+        } else {
+            alert('Connection failed: ' + error.message);
+        }
+    }
+};
+
+// ========== START ECG TEST (FIXED) ==========
+window.startECGTest = function() {
+    if (!patientData.deviceConnected) {
+        alert('❌ Please connect device first!');
+        return;
+    }
+    
+    console.log('▶️ Starting 30-Second ECG Test');
+    
+    patientData.ecgData = [];
+    window.isRecording = true;
+    
+    showStep(STEPS.ECG_TEST);
+    
+    // Initialize live ECG canvas
+    setTimeout(() => {
+        if (typeof initLiveECG === 'function') {
+            initLiveECG();
+        }
+        startTestTimer();
+    }, 500);
 };

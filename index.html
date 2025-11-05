@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CardioCheck - ECG Heart Monitor</title>
+    <title>Cardiogram- ECG Heart Monitor</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,10 +14,17 @@
     <!-- CSS Files -->
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/home.css">
+    <!-- Add BEFORE your custom JS files -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chatbot CSS -->
+    <link rel="stylesheet" href="css/chatbot.css">
 </head>
 
 <body>
+        <!-- Chatbot Widget -->
+        <div id="chatbot-widget"></div>
     <!-- NAVBAR -->
+     
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <div class="logo">
@@ -60,7 +67,7 @@
             <div class="hero-content">
                 <span class="hero-badge">
                     <i class="fas fa-certificate"></i>
-                    Medical Grade Certified
+                    Medical-Grade Accuracy
                 </span>
                 
                 <h1 class="hero-title">
@@ -359,5 +366,6 @@
     <script src="js/main.js"></script>
     <script src="js/bluetooth.js"></script>
     <script src="js/ecg.js"></script>
+    <script src="js/chatbot.js"></script>
 </body>
 </html>

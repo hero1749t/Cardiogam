@@ -1,336 +1,434 @@
 /* ============================================
-   BLUETOOTH.JS - Professional Quick Connect
+   BLUETOOTH.JS - Hardware Integration
+   Supports: nRF52840 + Heart BioAmp Candy
    ============================================ */
 
-let connectedDevice = null;
-let deviceCharacteristic = null;
+import CONFIG from './config.js';
 
-// ========== QUICK BLUETOOTH CONNECT (ONE-CLICK) ==========
-async function quickConnectBLE() {
-    console.log('🔵 Quick Connect initiated...');
-    
-    // Check browser support
-    if (!navigator.bluetooth) {
-        showError('Bluetooth not supported', 
-            'Please use Chrome, Edge, or Opera browser.\n\nOr enable Experimental Web Platform features.');
-        return;
+class BluetoothManager {
+    constructor() {
+        this.device = null;
+        this.server = null;
+        this.ecgCharacteristic = null;
+        this.batteryCharacteristic = null;
+        this.isConnected = false;
+        this.isDemoMode = false;
+        this.demoInterval = null;
     }
 
-    // Show connecting status
-    showConnecting('Opening Bluetooth picker...');
+    // ========== CHECK BROWSER SUPPORT ==========
+    checkSupport() {
+        if (!navigator.bluetooth) {
+            console.error('❌ Web Bluetooth not supported');
+            return false;
+        }
+        console.log('✅ Web Bluetooth supported');
+        return true;
+    }
 
-    try {
-        // Request device (Browser shows popup automatically)
-        console.log('📱 Opening device picker...');
-        const device = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: [
-                'heart_rate',           // Standard Heart Rate Service
-                'battery_service',      // Battery info
-                'device_information'    // Device details
-            ]
-        });
+    // ========== CONNECT TO REAL DEVICE ==========
+    async connectDevice() {
+        if (!this.checkSupport()) {
+            throw new Error('Web Bluetooth not supported. Use Chrome/Edge/Opera.');
+        }
 
-        console.log('✅ Device selected:', device.name);
+        try {
+            console.log('🔵 Opening device picker...');
+            
+            // Request device
+            this.device = await navigator.bluetooth.requestDevice({
+                filters: [
+                    { services: [CONFIG.BLUETOOTH.HEART_RATE_SERVICE] },
+                    { name: 'Cardiogam' }, // Your device name
+                    { namePrefix: 'nRF' }  // nRF devices
+                ],
+                optionalServices: [
+                    CONFIG.BLUETOOTH.HEART_RATE_SERVICE,
+                    CONFIG.BLUETOOTH.BATTERY_SERVICE,
+                    CONFIG.BLUETOOTH.CUSTOM_ECG_SERVICE // if using custom
+                ]
+            });
+
+            console.log('✅ Device selected:', this.device.name);
+
+            // Connect to GATT server
+            console.log('🔌 Connecting to GATT server...');
+            this.server = await this.device.gatt.connect();
+            console.log('✅ GATT connected');
+
+            // Setup services and characteristics
+            await this.setupServices();
+
+            // Setup disconnect handler
+            this.device.addEventListener('gattserverdisconnected', () => {
+                console.log('⚠️ Device disconnected');
+                this.handleDisconnect();
+            });
+
+            this.isConnected = true;
+            this.updateConnectionUI(true);
+
+            return {
+                success: true,
+                deviceName: this.device.name,
+                deviceId: this.device.id
+            };
+
+        } catch (error) {
+            console.error('❌ Connection error:', error);
+            throw error;
+        }
+    }
+
+    // ========== SETUP BLUETOOTH SERVICES ==========
+    async setupServices() {
+        try {
+            // Get Heart Rate Service
+            const hrService = await this.server.getPrimaryService(
+                CONFIG.BLUETOOTH.HEART_RATE_SERVICE
+            );
+            console.log('✅ Heart Rate Service found');
+
+            // Get ECG characteristic
+            this.ecgCharacteristic = await hrService.getCharacteristic(
+                CONFIG.BLUETOOTH.HEART_RATE_CHAR
+            );
+            console.log('✅ ECG Characteristic found');
+
+            // Start notifications
+            await this.ecgCharacteristic.startNotifications();
+            this.ecgCharacteristic.addEventListener(
+                'characteristicvaluechanged',
+                this.handleECGData.bind(this)
+            );
+            console.log('✅ ECG notifications enabled');
+
+            // Optional: Battery service
+            try {
+                const batteryService = await this.server.getPrimaryService(
+                    CONFIG.BLUETOOTH.BATTERY_SERVICE
+                );
+                this.batteryCharacteristic = await batteryService.getCharacteristic(
+                    CONFIG.BLUETOOTH.BATTERY_LEVEL_CHAR
+                );
+                const batteryLevel = await this.batteryCharacteristic.readValue();
+                console.log('🔋 Battery:', batteryLevel.getUint8(0) + '%');
+            } catch (e) {
+                console.log('ℹ️ Battery service not available');
+            }
+
+        } catch (error) {
+            console.error('❌ Service setup error:', error);
+            throw error;
+        }
+    }
+
+    // ========== HANDLE INCOMING ECG DATA ==========
+    handleECGData(event) {
+        const value = event.target.value;
         
-        // Update status
-        showConnecting(`Connecting to ${device.name || 'device'}...`);
-
-        // Connect to device
-        await connectAndSetup(device);
-
-    } catch (error) {
-        console.error('❌ Connection error:', error);
+        // Parse based on your nRF firmware format
+        // Adjust this based on how your device sends data
         
-        if (error.name === 'NotFoundError') {
-            // User cancelled
-            hideConnecting();
-            console.log('User cancelled device selection');
+        // Standard Heart Rate format (assuming your device follows this)
+        const flags = value.getUint8(0);
+        const rate16Bits = flags & 0x1;
+        
+        let heartRate;
+        if (rate16Bits) {
+            heartRate = value.getUint16(1, true); // Little-endian
         } else {
-            showError('Connection Failed', error.message);
+            heartRate = value.getUint8(1);
         }
-    }
-}
 
-// ========== CONNECT & SETUP DEVICE ==========
-async function connectAndSetup(device) {
-    try {
-        // Store device reference
-        connectedDevice = device;
-
-        // Connect to GATT Server
-        console.log('🔌 Connecting to GATT...');
-        const server = await device.gatt.connect();
-        console.log('✅ GATT connected');
-
-        // Get Heart Rate Service
-        showConnecting('Reading device services...');
-        const service = await server.getPrimaryService('heart_rate');
-        console.log('✅ Heart Rate Service found');
-
-        // Get Characteristic
-        deviceCharacteristic = await service.getCharacteristic('heart_rate_measurement');
-        console.log('✅ Heart Rate Characteristic found');
-
-        // Start notifications
-        await deviceCharacteristic.startNotifications();
-        deviceCharacteristic.addEventListener('characteristicvaluechanged', handleHeartRateData);
-        console.log('✅ Notifications enabled');
-
-        // Connection complete!
-        showSuccess(device.name || 'ECG Monitor');
-
-        // Update navbar
-        updateNavbarStatus(true);
-
-    } catch (error) {
-        console.error('❌ Setup error:', error);
-        showError('Setup Failed', 
-            'Could not connect to device services.\n\nMake sure your device supports Heart Rate Profile.');
-    }
-}
-
-// ========== HANDLE INCOMING DATA ==========
-function handleHeartRateData(event) {
-    const value = event.target.value;
-    const flags = value.getUint8(0);
-    const heartRateFormat = flags & 0x01;
-    
-    let heartRate;
-    if (heartRateFormat === 0) {
-        heartRate = value.getUint8(1);
-    } else {
-        heartRate = value.getUint16(1, true);
-    }
-
-    console.log('💓 Heart Rate:', heartRate, 'BPM');
-
-    // Update live display
-    const hrElement = document.getElementById('liveHeartRate');
-    if (hrElement) {
-        hrElement.textContent = heartRate;
-    }
-
-    // Trigger ECG callback
-    if (window.onDeviceData) {
-        window.onDeviceData(heartRate);
-    }
-}
-
-// ========== UI FUNCTIONS ==========
-function showConnecting(message) {
-    const statusBox = document.getElementById('connectionStatus');
-    const messageEl = document.getElementById('statusMessage');
-    
-    if (statusBox) {
-        statusBox.style.display = 'block';
-        if (messageEl) messageEl.textContent = message;
-    }
-}
-
-function hideConnecting() {
-    const statusBox = document.getElementById('connectionStatus');
-    if (statusBox) {
-        statusBox.style.display = 'none';
-    }
-}
-
-function showSuccess(deviceName) {
-    hideConnecting();
-    
-    const successBox = document.getElementById('deviceConnected');
-    const deviceNameEl = document.getElementById('deviceName');
-    
-    if (successBox) {
-        successBox.style.display = 'block';
-        if (deviceNameEl) {
-            deviceNameEl.textContent = deviceName;
+        // If your device sends raw ECG values, parse them here
+        // Example: Multiple samples in one packet
+        let ecgSamples = [];
+        
+        // Adjust byte positions based on your packet structure
+        for (let i = 2; i < value.byteLength; i += 2) {
+            try {
+                // Assuming 16-bit signed integers for ECG values
+                const sample = value.getInt16(i, true) / 1000; // Convert to mV
+                ecgSamples.push(sample);
+            } catch (e) {
+                // End of data
+                break;
+            }
         }
-    }
-}
 
-function showError(title, message) {
-    hideConnecting();
-    alert(`❌ ${title}\n\n${message}`);
-}
+        console.log('💓 HR:', heartRate, 'BPM | Samples:', ecgSamples.length);
 
-function updateNavbarStatus(connected) {
-    const bleBtn = document.getElementById('bleBtn');
-    if (bleBtn) {
-        if (connected) {
-            bleBtn.classList.add('connected');
+        // Send data to ECG renderer
+        if (ecgSamples.length > 0) {
+            ecgSamples.forEach(sample => {
+                this.notifyECGListeners({
+                    value: sample,
+                    timestamp: Date.now(),
+                    heartRate: heartRate,
+                    source: 'device'
+                });
+            });
         } else {
-            bleBtn.classList.remove('connected');
+            // Fallback: Generate point from heart rate
+            this.notifyECGListeners({
+                value: 0, // Will be handled by ECG generator
+                timestamp: Date.now(),
+                heartRate: heartRate,
+                source: 'device'
+            });
         }
+
+        // Update UI
+        this.updateHeartRateDisplay(heartRate);
     }
-}
 
-// ========== DEMO MODE (NO DEVICE NEEDED) ==========
-// ========== DEMO MODE (WITH RANDOM ECG DATA) ==========
-function useDemoMode() {
-    console.log('🎮 Demo mode activated');
-    
-    showConnecting('Initializing demo mode...');
-    
-    setTimeout(() => {
-        showSuccess('Demo Device (Simulated)');
-        updateNavbarStatus(true);
+    // ========== DEMO MODE ==========
+    async enableDemoMode() {
+        console.log('🎮 Demo mode enabled');
+        
+        this.isDemoMode = true;
+        this.isConnected = true;
+        
+        this.updateConnectionUI(true, 'Demo Device');
 
-        // Mark device connected in dashboard state (if available)
+        // Mark device connected in dashboard
         if (typeof window.setDeviceConnected === 'function') {
             window.setDeviceConnected(true);
         }
 
-        // Ensure ECG renderer is in simulated (advanced) mode so waveform matches demo
+        // Switch ECG to simulated mode
         if (typeof window.switchToSimulated === 'function') {
             window.switchToSimulated();
         }
 
-        // Start sending random heart rate data
-        startDemoDataStream();
-    }, 1000);
-}
+        // Start demo data stream
+        this.startDemoStream();
 
-// ========== DEMO DATA GENERATOR ==========
-// ========== ADVANCED DEMO DATA GENERATOR ==========
-let demoDataInterval = null;
-let demoTime = 0;
-let demoHeartRate = 72;
-
-function startDemoDataStream() {
-    console.log('📊 Starting advanced demo data stream...');
-    
-    // Stop any existing stream
-    if (demoDataInterval) {
-        clearInterval(demoDataInterval);
+        return {
+            success: true,
+            deviceName: 'Demo Device (Simulated)',
+            deviceId: 'demo-' + Date.now()
+        };
     }
-    
-    // Reset time
-    demoTime = 0;
-    
-    // Vary heart rate slowly over time
-    setInterval(() => {
-        // Slowly change heart rate (simulate breathing, movement)
-        const change = (Math.random() - 0.5) * 2; // ±1 BPM change
-        demoHeartRate = Math.max(60, Math.min(90, demoHeartRate + change));
-    }, 5000); // Update every 5 seconds
-    
-    // Send data at 60 FPS (like real device)
-    demoDataInterval = setInterval(() => {
-        demoTime += 1 / 60; // Increment time
-        
-        // Generate ECG data point
-        const ecgValue = generateRealisticECG(demoTime, demoHeartRate);
-        
-        // Update live heart rate display
-        const hrElement = document.getElementById('liveHeartRate');
-        if (hrElement) {
-            hrElement.textContent = Math.round(demoHeartRate);
+
+    startDemoStream() {
+        if (this.demoInterval) {
+            clearInterval(this.demoInterval);
         }
-        
-        // Send to ECG renderer (if exists)
-        if (window.onDemoECGData) {
-            window.onDemoECGData({
+
+        let time = 0;
+        let baseHR = 72;
+
+        this.demoInterval = setInterval(() => {
+            time += 1 / 60;
+
+            // Vary heart rate slightly
+            if (Math.random() < 0.05) {
+                baseHR += (Math.random() - 0.5) * 2;
+                baseHR = Math.max(60, Math.min(90, baseHR));
+            }
+
+            // Generate realistic ECG point
+            const ecgValue = this.generateRealisticECG(time, baseHR);
+
+            this.notifyECGListeners({
                 value: ecgValue,
                 timestamp: Date.now(),
-                heartRate: Math.round(demoHeartRate)
+                heartRate: Math.round(baseHR),
+                source: 'demo'
             });
+
+        }, 1000 / 60); // 60 FPS
+    }
+
+    generateRealisticECG(time, heartRate) {
+        const beatInterval = 60 / heartRate;
+        const beatPosition = (time % beatInterval) / beatInterval;
+        
+        let value = 0;
+        
+        // P wave
+        if (beatPosition >= 0.05 && beatPosition < 0.15) {
+            const x = (beatPosition - 0.05) / 0.1;
+            value += 0.15 * Math.sin(x * Math.PI);
         }
         
-    }, 1000 / 60); // 60 FPS
-    
-    console.log('✅ Advanced demo data streaming at 60 FPS');
-}
-
-// Generate realistic ECG waveform (P-QRS-T complex)
-function generateRealisticECG(time, heartRate) {
-    const beatInterval = 60 / heartRate; // Time between beats
-    const beatPosition = (time % beatInterval) / beatInterval;
-    
-    let value = 0;
-    
-    // P wave (atrial depolarization)
-    if (beatPosition >= 0.05 && beatPosition < 0.15) {
-        const pos = (beatPosition - 0.05) / 0.1;
-        value = 0.15 * Math.sin(pos * Math.PI);
+        // QRS complex
+        if (beatPosition >= 0.25 && beatPosition < 0.35) {
+            const center = 0.30;
+            const sigma = 0.015;
+            const gauss = Math.exp(-Math.pow((beatPosition - center), 2) / (2 * sigma * sigma));
+            value += 1.0 * gauss;
+        }
+        
+        // T wave
+        if (beatPosition >= 0.46 && beatPosition < 0.72) {
+            const x = (beatPosition - 0.46) / 0.26;
+            value += 0.25 * Math.sin(x * Math.PI);
+        }
+        
+        // Add noise
+        value += (Math.random() - 0.5) * 0.02;
+        
+        return value;
     }
-    // QRS complex (ventricular depolarization)
-    else if (beatPosition >= 0.25 && beatPosition < 0.35) {
-        const pos = (beatPosition - 0.25) / 0.1;
-        if (pos < 0.2) {
-            value = -0.1 * (pos / 0.2); // Q wave
-        } else if (pos < 0.5) {
-            value = 1.2 * Math.sin((pos - 0.2) / 0.3 * Math.PI); // R peak
-        } else {
-            value = -0.3 * Math.sin((pos - 0.5) / 0.5 * Math.PI); // S wave
+
+    // ========== DISCONNECT ==========
+    async disconnect() {
+        if (this.isDemoMode) {
+            if (this.demoInterval) {
+                clearInterval(this.demoInterval);
+            }
+        } else if (this.device && this.device.gatt.connected) {
+            await this.device.gatt.disconnect();
+        }
+
+        this.isConnected = false;
+        this.isDemoMode = false;
+        this.updateConnectionUI(false);
+
+        console.log('🔌 Disconnected');
+    }
+
+    handleDisconnect() {
+        this.isConnected = false;
+        this.updateConnectionUI(false);
+        
+        if (typeof window.setDeviceConnected === 'function') {
+            window.setDeviceConnected(false);
+        }
+
+        alert('⚠️ Device disconnected! Please reconnect.');
+    }
+
+    // ========== EVENT LISTENERS ==========
+    listeners = [];
+
+    addListener(callback) {
+        this.listeners.push(callback);
+    }
+
+    notifyECGListeners(data) {
+        // Notify ECG renderer
+        if (window.onDemoECGData) {
+            window.onDemoECGData(data);
+        }
+
+        // Notify all listeners
+        this.listeners.forEach(listener => {
+            try {
+                listener(data);
+            } catch (e) {
+                console.error('Listener error:', e);
+            }
+        });
+
+        // Record data if test is running
+        if (window.isRecording && window.patientData) {
+            window.patientData.ecgData.push(data);
         }
     }
-    // T wave (ventricular repolarization)
-    else if (beatPosition >= 0.45 && beatPosition < 0.70) {
-        const pos = (beatPosition - 0.45) / 0.25;
-        value = 0.25 * Math.sin(pos * Math.PI);
-    }
-    
-    // Add realistic noise
-    value += Math.sin(time * 0.5) * 0.02; // Respiratory artifact
-    value += (Math.random() - 0.5) * 0.01; // Electrical noise
-    
-    return value;
-}
 
-function stopDemoDataStream() {
-    if (demoDataInterval) {
-        clearInterval(demoDataInterval);
-        demoDataInterval = null;
-        demoTime = 0;
-        console.log('⏹️ Demo data stream stopped');
+    // ========== UI UPDATES ==========
+    updateConnectionUI(connected, deviceName = null) {
+        const bleBtn = document.getElementById('bleBtn');
+        if (bleBtn) {
+            if (connected) {
+                bleBtn.classList.add('connected');
+            } else {
+                bleBtn.classList.remove('connected');
+            }
+        }
+
+        if (deviceName) {
+            const nameEl = document.getElementById('deviceName');
+            if (nameEl) nameEl.textContent = deviceName;
+        }
     }
-    // Mark device disconnected in dashboard state (if available)
-    if (typeof window.setDeviceConnected === 'function') {
-        window.setDeviceConnected(false);
-    }
-}
-    // Send random heart rate every 1 second
-    demoDataInterval = setInterval(() => {
-        // Generate realistic heart rate (60-90 BPM)
-        const baseHeartRate = 72;
-        const variation = Math.floor(Math.random() * 20) - 10; // ±10 BPM
-        const heartRate = baseHeartRate + variation;
-        
-        console.log('💓 Demo Heart Rate:', heartRate, 'BPM');
-        
-        // Update live display (if on ECG test page)
+
+    updateHeartRateDisplay(heartRate) {
         const hrElement = document.getElementById('liveHeartRate');
         if (hrElement) {
             hrElement.textContent = heartRate;
         }
-        
-        // Trigger ECG callback for graph
-        if (window.onDeviceData) {
-            window.onDeviceData(heartRate);
-        }
-        
-        // Simulate ECG data point for realistic waveform
-        if (window.ECGDataManager) {
-            // ECG.js will handle this automatically
-        }
-    }, 1000); // Every 1 second
-    
-    console.log('✅ Demo data streaming started');
+    }
 
-// ========== DISCONNECT ==========
-function disconnectDevice() {
-    if (connectedDevice && connectedDevice.gatt.connected) {
-        connectedDevice.gatt.disconnect();
-        console.log('🔌 Device disconnected');
-        updateNavbarStatus(false);
+    // ========== GET DEVICE INFO ==========
+    getDeviceInfo() {
+        if (this.isDemoMode) {
+            return {
+                name: 'Demo Device',
+                id: 'demo',
+                connected: true,
+                type: 'demo'
+            };
+        }
+
+        if (this.device) {
+            return {
+                name: this.device.name,
+                id: this.device.id,
+                connected: this.device.gatt.connected,
+                type: 'bluetooth'
+            };
+        }
+
+        return null;
     }
 }
 
-// ========== EXPOSE GLOBALLY ==========
-window.quickConnectBLE = quickConnectBLE;
-window.useDemoMode = useDemoMode;
-window.disconnectDevice = disconnectDevice;
-window.onDeviceData = null; // ECG.js will set this
+// Create global instance
+const bluetoothManager = new BluetoothManager();
 
-console.log('📶 Bluetooth module ready');
+// Expose functions globally for HTML onclick handlers
+window.quickConnectBLE = async () => {
+    const statusBox = document.getElementById('connectionStatus');
+    const connectedBox = document.getElementById('deviceConnected');
+    
+    try {
+        statusBox.style.display = 'block';
+        document.getElementById('statusMessage').textContent = 'Connecting to device...';
+        
+        const result = await bluetoothManager.connectDevice();
+        
+        statusBox.style.display = 'none';
+        connectedBox.style.display = 'block';
+        
+        document.getElementById('deviceName').textContent = result.deviceName;
+        
+        console.log('✅ Connected:', result);
+        
+    } catch (error) {
+        statusBox.style.display = 'none';
+        
+        if (error.name === 'NotFoundError') {
+            console.log('User cancelled');
+        } else {
+            alert('Connection failed: ' + error.message);
+        }
+    }
+};
+
+window.useDemoMode = async () => {
+    const statusBox = document.getElementById('connectionStatus');
+    const connectedBox = document.getElementById('deviceConnected');
+    
+    statusBox.style.display = 'block';
+    document.getElementById('statusMessage').textContent = 'Initializing demo mode...';
+    
+    setTimeout(async () => {
+        const result = await bluetoothManager.enableDemoMode();
+        
+        statusBox.style.display = 'none';
+        connectedBox.style.display = 'block';
+        
+        document.getElementById('deviceName').textContent = result.deviceName;
+        
+        console.log('✅ Demo mode active');
+    }, 1000);
+};
+
+window.bluetoothManager = bluetoothManager;
+
+export default bluetoothManager;

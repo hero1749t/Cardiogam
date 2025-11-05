@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Cardiogam</title>
+    <title>Sign Up - Cardiogam</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/common.css">
-    
+    <!-- Add BEFORE your custom JS files -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -20,7 +20,7 @@
             justify-content: center;
         }
         
-        .login-card {
+        .signup-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
@@ -30,12 +30,12 @@
             width: 100%;
         }
         
-        .login-header {
+        .signup-header {
             text-align: center;
             margin-bottom: 2rem;
         }
         
-        .login-header h1 {
+        .signup-header h1 {
             color: #667eea;
             font-size: 2rem;
             margin-bottom: 0.5rem;
@@ -66,7 +66,7 @@
             border-color: #667eea;
         }
         
-        .btn-login {
+        .btn-signup {
             width: 100%;
             padding: 1rem;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -79,29 +79,23 @@
             transition: transform 0.3s;
         }
         
-        .btn-login:hover {
+        .btn-signup:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
         
-        .btn-login:disabled {
+        .btn-signup:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
         
-        .divider {
-            text-align: center;
-            margin: 1.5rem 0;
-            color: #666;
-        }
-        
-        .signup-link {
+        .login-link {
             text-align: center;
             margin-top: 1.5rem;
             color: #666;
         }
         
-        .signup-link a {
+        .login-link a {
             color: #667eea;
             font-weight: 600;
             text-decoration: none;
@@ -127,16 +121,23 @@
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <div class="login-header">
+    <div class="signup-card">
+        <div class="signup-header">
             <h1><i class="fas fa-heartbeat"></i> Cardiogam</h1>
-            <p>Welcome back! Please sign in to continue.</p>
+            <p>Create your account to start monitoring your heart health.</p>
         </div>
         
         <div class="error-message" id="errorMessage"></div>
         <div class="success-message" id="successMessage"></div>
         
-        <form id="loginForm">
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="fullName">
+                    <i class="fas fa-user"></i> Full Name
+                </label>
+                <input type="text" id="fullName" required placeholder="John Doe">
+            </div>
+            
             <div class="form-group">
                 <label for="email">
                     <i class="fas fa-envelope"></i> Email Address
@@ -148,22 +149,23 @@
                 <label for="password">
                     <i class="fas fa-lock"></i> Password
                 </label>
-                <input type="password" id="password" required placeholder="Enter your password">
+                <input type="password" id="password" required placeholder="Minimum 6 characters" minlength="6">
             </div>
             
-            <button type="submit" class="btn-login" id="loginBtn">
-                <i class="fas fa-sign-in-alt"></i> Sign In
+            <div class="form-group">
+                <label for="confirmPassword">
+                    <i class="fas fa-lock"></i> Confirm Password
+                </label>
+                <input type="password" id="confirmPassword" required placeholder="Re-enter password">
+            </div>
+            
+            <button type="submit" class="btn-signup" id="signupBtn">
+                <i class="fas fa-user-plus"></i> Create Account
             </button>
         </form>
         
-        <div class="divider">
-            <a href="#" onclick="forgotPassword()" style="color: #667eea; text-decoration: none;">
-                Forgot Password?
-            </a>
-        </div>
-        
-        <div class="signup-link">
-            Don't have an account? <a href="signup.html">Sign Up</a>
+        <div class="login-link">
+            Already have an account? <a href="login.html">Sign In</a>
         </div>
     </div>
 
@@ -173,57 +175,54 @@
         import './js/supabase-client.js';
         import authManager from './js/auth.js';
 
-        const loginForm = document.getElementById('loginForm');
-        const loginBtn = document.getElementById('loginBtn');
+        const signupForm = document.getElementById('signupForm');
+        const signupBtn = document.getElementById('signupBtn');
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
 
-        loginForm.addEventListener('submit', async (e) => {
+        signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const fullName = document.getElementById('fullName').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate password match
+            if (password !== confirmPassword) {
+                errorMessage.textContent = '❌ Passwords do not match!';
+                errorMessage.style.display = 'block';
+                return;
+            }
             
             // Disable button
-            loginBtn.disabled = true;
-            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+            signupBtn.disabled = true;
+            signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
             
             // Hide messages
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
             
-            // Attempt login
-            const result = await authManager.signIn(email, password);
+            // Attempt signup
+            const result = await authManager.signUp(email, password, fullName);
             
             if (result.success) {
-                successMessage.textContent = '✅ Login successful! Redirecting...';
+                successMessage.textContent = '✅ Account created! Please check your email to verify.';
                 successMessage.style.display = 'block';
                 
+                signupForm.reset();
+                
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
+                    window.location.href = 'login.html';
+                }, 3000);
             } else {
                 errorMessage.textContent = '❌ ' + result.error;
                 errorMessage.style.display = 'block';
                 
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+                signupBtn.disabled = false;
+                signupBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
             }
         });
-
-        window.forgotPassword = async () => {
-            const email = prompt('Enter your email address:');
-            
-            if (email) {
-                const result = await authManager.resetPassword(email);
-                
-                if (result.success) {
-                    alert('✅ Password reset link sent to your email!');
-                } else {
-                    alert('❌ ' + result.error);
-                }
-            }
-        };
     </script>
 </body>
 </html>

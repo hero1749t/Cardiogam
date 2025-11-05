@@ -15,8 +15,31 @@
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/report.css">
+    <!-- Add BEFORE your custom JS files -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chatbot CSS -->
+    <link rel="stylesheet" href="css/chatbot.css">
+    <!-- Chatbot Widget -->
 </head>
 <body>
+    <body>
+          <div id="chatbot-widget"></div>
+    <!-- Auth check -->
+    <script type="module">
+        import './js/config.js';
+        import './js/supabase-client.js';
+        import authManager from './js/auth.js';
+        
+        // Protect this page
+        (async () => {
+            const isAuthenticated = await authManager.requireAuth();
+            if (!isAuthenticated) {
+                // Will redirect to login automatically
+            }
+        })();
+    </script>
+
+        
     <!-- NAVBAR -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
@@ -132,7 +155,7 @@
             <p>Choose your connection method</p>
         </div>
 
-        <!-- Connection Method Cards -->
+        <!-- Connection Options -->
         <div class="connection-options">
             <!-- Bluetooth Option -->
             <div class="connection-card">
@@ -161,7 +184,7 @@
             </div>
         </div>
 
-        <!-- Connection Status (Hidden initially) -->
+        <!-- Connection Status -->
         <div id="connectionStatus" class="connection-status-box" style="display: none;">
             <div class="spinner"></div>
             <p id="statusMessage">Connecting...</p>
@@ -594,5 +617,12 @@
     <script src="js/dashboard.js"></script>
     <script src="js/bluetooth.js"></script>
     <script src="js/ecg.js"></script>
+    <!-- Chatbot Widget -->
+    <div id="chatbot-widget">
+    <!-- Paste the chatbot HTML here -->
+    </div>
+
+<!-- Chatbot Script -->
+    <script src="js/chatbot.js"></script>
 </body>
 </html>

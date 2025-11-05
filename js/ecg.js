@@ -550,19 +550,24 @@ function switchToRealDevice() {
     liveECG.dataManager.switchMode(CURRENT_MODE);
   }
 }
+// ========== MODE SWITCHING (MUST HAVE) ==========
+window.switchToSimulated = function() {
+    CURRENT_MODE = ECG_MODE.SIMULATED;
+    console.log('🎮 Switched to SIMULATED mode');
+    
+    if (liveECG && liveECG.dataManager) {
+        liveECG.dataManager.switchMode(CURRENT_MODE);
+    }
+};
 
-function switchToSimulated() {
-  CURRENT_MODE = ECG_MODE.SIMULATED;
-  console.log('🎮 Switched to SIMULATED mode');
-  
-  if (heroECG) {
-    heroECG.dataManager.switchMode(CURRENT_MODE);
-  }
-  if (liveECG) {
-    liveECG.dataManager.switchMode(CURRENT_MODE);
-  }
-}
-
+window.switchToRealDevice = function() {
+    CURRENT_MODE = ECG_MODE.REAL_DEVICE;
+    console.log('🔌 Switched to REAL DEVICE mode');
+    
+    if (liveECG && liveECG.dataManager) {
+        liveECG.dataManager.switchMode(CURRENT_MODE);
+    }
+};
 // ========== WINDOW RESIZE HANDLER ==========
 window.addEventListener('resize', () => {
   if (heroECG) heroECG.initCanvas();

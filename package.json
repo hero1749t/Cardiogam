@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.78.0",
+    "dotenv": "^17.2.3",
+    "jspdf": "^3.0.3",
+    "jspdf-autotable": "^5.0.2"
+  },
+  "name": "cardiogam",
+  "version": "1.0.0",
+  "description": "Cardiogam is a lightweight front-end project for ECG visualization and quick device/demo testing. It supports real Bluetooth heart-rate devices (when available) and a realistic simulated/demo waveform for testing.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hero1749t/Cardiogam.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hero1749t/Cardiogam/issues"
+  },
+  "homepage": "https://github.com/hero1749t/Cardiogam#readme"
+}

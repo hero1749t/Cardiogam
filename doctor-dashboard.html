@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - Cardiogram</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/doctor-dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>Cardiogram</span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="#" class="active">Dashboard</a></li>
+                <li><a href="#patients">Patients</a></li>
+                <li><a href="#reports">Reports</a></li>
+                <li><a href="#analytics">Analytics</a></li>
+            </ul>
+
+            <div class="nav-right">
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="doctor-profile">
+                    <img src="https://via.placeholder.com/40" alt="Dr. Profile">
+                    <span>Dr. Smith</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN DASHBOARD -->
+    <div class="dashboard-wrapper">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Actions</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Overview</span>
+                </li>
+                <li>
+                    <i class="fas fa-users"></i>
+                    <span>All Patients</span>
+                </li>
+                <li>
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Critical Alerts</span>
+                    <span class="badge">2</span>
+                </li>
+                <li>
+                    <i class="fas fa-file-medical"></i>
+                    <span>Recent Reports</span>
+                </li>
+                <li>
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Appointments</span>
+                </li>
+                <li>
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- STATS OVERVIEW -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon patients">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Patients</h3>
+                        <p class="stat-value">248</p>
+                        <span class="stat-change positive">+12% this month</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon reports">
+                        <i class="fas fa-file-medical-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Reports Today</h3>
+                        <p class="stat-value">23</p>
+                        <span class="stat-change positive">+5 pending</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon alerts">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Critical Alerts</h3>
+                        <p class="stat-value">2</p>
+                        <span class="stat-change negative">Requires attention</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon appointments">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Appointments</h3>
+                        <p class="stat-value">8</p>
+                        <span class="stat-change neutral">Today's schedule</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CRITICAL ALERTS -->
+            <section class="alerts-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-bell"></i> Critical Alerts</h2>
+                    <button class="btn-secondary-small">View All</button>
+                </div>
+                <div class="alerts-container" id="criticalAlerts">
+                    <!-- Alerts will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- RECENT PATIENTS -->
+            <section class="patients-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-users"></i> Recent Patients</h2>
+                    <div class="section-actions">
+                        <input type="search" placeholder="Search patients..." class="search-input">
+                        <button class="btn-primary-small">
+                            <i class="fas fa-plus"></i> Add Patient
+                        </button>
+                    </div>
+                </div>
+                <div class="patients-table-wrapper">
+                    <table class="patients-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Age</th>
+                                <th>Last Test</th>
+                                <th>Heart Rate</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsTableBody">
+                            <!-- Patients will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ANALYTICS CHART -->
+            <section class="analytics-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i> ECG Tests Analytics</h2>
+                    <select class="filter-select">
+                        <option>Last 7 Days</option>
+                        <option>Last 30 Days</option>
+                        <option>Last 3 Months</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="testsChart"></canvas>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- PATIENT DETAIL MODAL -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content-large">
+            <span class="modal-close" onclick="closePatientModal()">&times;</span>
+            <div id="patientDetailContent">
+                <!-- Patient details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/doctor-dashboard.js"></script>
+</body>
+</html>
