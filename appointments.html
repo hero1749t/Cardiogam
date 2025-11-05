@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - Cardiogam</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body {
+            background: #0f1116;
+            padding-top: 80px;
+        }
+        
+        .appointments-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .page-header {
+            margin-bottom: 3rem;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        
+        .appointments-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+        
+        .appointments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .appointment-card {
+            background: #1a1d2e;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .appointment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(99,102,241,0.15);
+            border-color: var(--primary);
+        }
+        
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .appointment-info h3 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .appointment-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.upcoming {
+            background: rgba(99,102,241,0.12);
+            color: #6366f1;
+        }
+        
+        .status-badge.completed {
+            background: rgba(16,185,129,0.12);
+            color: #10b981;
+        }
+        
+        .status-badge.cancelled {
+            background: rgba(239,68,68,0.12);
+            color: #ef4444;
+        }
+        
+        .appointment-details {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #cbd5e1;
+        }
+        
+        .detail-item i {
+            color: var(--primary);
+        }
+        
+        .appointment-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-action {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary-action {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary-action {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-danger-action {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        
+        .sidebar-widget {
+            background: #1a1d2e;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        
+        .widget-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .widget-header h3 {
+            color: #fff;
+            font-size: 1.2rem;
+        }
+        
+        .calendar {
+            background: rgba(255,255,255,0.03);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .calendar-month {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .calendar-day {
+            padding: 0.5rem;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .calendar-day:hover {
+            background: rgba(99,102,241,0.12);
+            color: var(--primary);
+        }
+        
+        .calendar-day.today {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .calendar-day.has-appointment {
+            background: rgba(16,185,129,0.12);
+            color: var(--success);
+        }
+        
+        .btn-new-appointment {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-new-appointment:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99,102,241,0.3);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #1a1d2e;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .modal-header h2 {
+            color: #fff;
+            font-size: 1.5rem;
+        }
+        
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #cbd5e1;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        @media (max-width: 768px) {
+            .appointments-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .appointment-details {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .appointment-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>Cardiogam</span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">ECG Test</a></li>
+                <li><a href="appointments.html" class="active">Appointments</a></li>
+            </ul>
+
+            <div class="nav-right">
+                <a href="login.html" class="btn-signin">
+                    <i class="fas fa-user"></i>
+                    Sign In
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="appointments-container">
+        <div class="page-header">
+            <h1><i class="fas fa-calendar-check"></i> My Appointments</h1>
+            <p>Manage your doctor appointments and ECG test schedules</p>
+        </div>
+
+        <div class="appointments-grid">
+            <!-- Appointments List -->
+            <div class="appointments-list" id="appointmentsList">
+                <!-- Sample Appointment 1 -->
+                <div class="appointment-card">
+                    <div class="appointment-header">
+                        <div class="appointment-info">
+                            <h3>Dr. Rajesh Kumar - Cardiologist</h3>
+                            <div class="appointment-date">
+                                <i class="fas fa-calendar"></i>
+                                <span>Monday, November 18, 2025</span>
+                            </div>
+                        </div>
+                        <span class="status-badge upcoming">Upcoming</span>
+                    </div>
+                    
+                    <div class="appointment-details">
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i>
+                            <span>10:00 AM</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>City Hospital, Delhi</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone"></i>
+                            <span>+91 98765 43210</span>
+                        </div>
+                    </div>
+                    
+                    <div class="appointment-actions">
+                        <button class="btn-action btn-primary-action">
+                            <i class="fas fa-video"></i> Join Online
+                        </button>
+                        <button class="btn-action btn-secondary-action">
+                            <i class="fas fa-edit"></i> Reschedule
+                        </button>
+                        <button class="btn-action btn-danger-action">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sample Appointment 2 -->
+                <div class="appointment-card">
+                    <div class="appointment-header">
+                        <div class="appointment-info">
+                            <h3>ECG Test - Routine Checkup</h3>
+                            <div class="appointment-date">
+                                <i class="fas fa-calendar"></i>
+                                <span>Wednesday, November 20, 2025</span>
+                            </div>
+                        </div>
+                        <span class="status-badge upcoming">Upcoming</span>
+                    </div>
+                    
+                    <div class="appointment-details">
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i>
+                            <span>2:00 PM</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Diagnostic Center, Mumbai</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone"></i>
+                            <span>+91 87654 32109</span>
+                        </div>
+                    </div>
+                    
+                    <div class="appointment-actions">
+                        <button class="btn-action btn-secondary-action">
+                            <i class="fas fa-edit"></i> Reschedule
+                        </button>
+                        <button class="btn-action btn-danger-action">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Past Appointment -->
+                <div class="appointment-card">
+                    <div class="appointment-header">
+                        <div class="appointment-info">
+                            <h3>Dr. Priya Sharma - Follow-up</h3>
+                            <div class="appointment-date">
+                                <i class="fas fa-calendar"></i>
+                                <span>Friday, November 1, 2025</span>
+                            </div>
+                        </div>
+                        <span class="status-badge completed">Completed</span>
+                    </div>
+                    
+                    <div class="appointment-details">
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i>
+                            <span>11:30 AM</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Heart Clinic, Bangalore</span>
+                        </div>
+                    </div>
+                    
+                    <div class="appointment-actions">
+                        <button class="btn-action btn-primary-action">
+                            <i class="fas fa-file-download"></i> Download Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div>
+                <!-- New Appointment Button -->
+                <button class="btn-new-appointment" onclick="openNewAppointmentModal()">
+                    <i class="fas fa-plus"></i>
+                    Book New Appointment
+                </button>
+
+                <!-- Calendar Widget -->
+                <div class="sidebar-widget" style="margin-top: 2rem;">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-calendar-alt"></i> Calendar</h3>
+                    </div>
+                    
+                    <div class="calendar">
+                        <div class="calendar-month">November 2025</div>
+                        <div class="calendar-grid">
+                            <div class="calendar-day">S</div>
+                            <div class="calendar-day">M</div>
+                            <div class="calendar-day">T</div>
+                            <div class="calendar-day">W</div>
+                            <div class="calendar-day">T</div>
+                            <div class="calendar-day">F</div>
+                            <div class="calendar-day">S</div>
+                            
+                            <div class="calendar-day">1</div>
+                            <div class="calendar-day">2</div>
+                            <div class="calendar-day">3</div>
+                            <div class="calendar-day">4</div>
+                            <div class="calendar-day today">5</div>
+                            <div class="calendar-day">6</div>
+                            <div class="calendar-day">7</div>
+                            <div class="calendar-day">8</div>
+                            <div class="calendar-day">9</div>
+                            <div class="calendar-day">10</div>
+                            <div class="calendar-day">11</div>
+                            <div class="calendar-day">12</div>
+                            <div class="calendar-day">13</div>
+                            <div class="calendar-day">14</div>
+                            <div class="calendar-day">15</div>
+                            <div class="calendar-day">16</div>
+                            <div class="calendar-day">17</div>
+                            <div class="calendar-day has-appointment">18</div>
+                            <div class="calendar-day">19</div>
+                            <div class="calendar-day has-appointment">20</div>
+                            <div class="calendar-day">21</div>
+                            <div class="calendar-day">22</div>
+                            <div class="calendar-day">23</div>
+                            <div class="calendar-day">24</div>
+                            <div class="calendar-day">25</div>
+                            <div class="calendar-day">26</div>
+                            <div class="calendar-day">27</div>
+                            <div class="calendar-day">28</div>
+                            <div class="calendar-day">29</div>
+                            <div class="calendar-day">30</div>
+                            <div class="calendar-day">31</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for New Appointment -->
+    <div id="newAppointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> Book New Appointment</h2>
+                <button class="modal-close" onclick="closeNewAppointmentModal()">&times;</button>
+            </div>
+            <form id="newAppointmentForm">
+                <div class="form-group">
+                    <label for="doctorName">Doctor's Name</label>
+                    <input type="text" id="doctorName" required placeholder="Dr. Name">
+                </div>
+                <div class="form-group">
+                    <label for="appointmentDate">Date</label>
+                    <input type="date" id="appointmentDate" required>   
+                </div>
+
+                <div class="form-group">
+                    <label for="appointmentTime">Time</label>
+                    <input type="time" id="appointmentTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="patientName">Patient's Name</label>
+                    <input type="text" id="patientName" required placeholder="Patient Name">
+                </div>
+
+                <div class="form-group">
+                    <label for="patientContact">Patient's Contact</label>
+                    <input type="text" id="patientContact" required placeholder="Patient Contact">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Book Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+    <!-- Load scripts as modules -->
+    <script type="module" src="js/appointments.js"></script>
+    </script>
+</body>
+</html> 

@@ -1,4 +1,88 @@
-/* ============================================
+// ========== INJECT CHATBOT HTML ==========
+function injectChatbotHTML() {
+    const widget = document.getElementById('chatbot-widget');
+    if (!widget) return;
+    
+    widget.innerHTML = `
+        <!-- Chat Button -->
+        
+        <button class="chat-toggle-btn" id="chatToggleBtn">
+            <i class="fas fa-comments"></i>
+            <span class="chat-badge">AI</span>
+        </button>
+
+        <!-- Chat Window -->
+        <div class="chat-window" id="chatWindow">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <div class="bot-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h4>CardioCare Assistant</h4>
+                        <span class="bot-status">
+                            <span class="status-dot"></span>
+                            Online
+                        </span>
+                    </div>
+                </div>
+                <button class="chat-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Hello! 👋 I'm your AI health assistant. How can I help you today?</p>
+                        <span class="message-time">Just now</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="chat-input-container">
+                <input 
+                    type="text" 
+                    class="chat-input" 
+                    id="chatInput" 
+                    placeholder="Ask about heart health..."
+                />
+                <button class="chat-send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- Quick Questions -->
+            <div class="quick-questions">
+                <button class="quick-btn" onclick="askQuickQuestion('What is a normal heart rate?')">
+                    Normal heart rate?
+                </button>
+                <button class="quick-btn" onclick="askQuickQuestion('How does ECG work?')">
+                    How ECG works?
+                </button>
+                <button class="quick-btn" onclick="askQuickQuestion('When should I see a doctor?')">
+                    When see doctor?
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Call on load
+document.addEventListener('DOMContentLoaded', injectChatbotHTML);/* ============================================
    CHATBOT.JS - Gemini AI Integration
    ============================================ */
 
@@ -149,7 +233,10 @@ User question: ${userMessage}`;
 }
 
 // ========== INITIALIZE CHATBOT ==========
+// ========== INITIALIZE CHATBOT ==========
 document.addEventListener('DOMContentLoaded', function() {
+    injectChatbotHTML(); // ✅ Add this
+    
     console.log('🤖 AI Chatbot initialized');
     
     // Add Enter key support
@@ -161,8 +248,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // ✅ ADD THESE EVENT LISTENERS
+    const toggleBtn = document.getElementById('chatToggleBtn');
+    const closeBtn = document.querySelector('.chat-close-btn');
+    const sendBtn = document.querySelector('.chat-send-btn');
+    
+    if (toggleBtn) toggleBtn.addEventListener('click', toggleChat);
+    if (closeBtn) closeBtn.addEventListener('click', toggleChat);
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
 });
-
 // ========== EXPOSE FUNCTIONS GLOBALLY ==========
 window.toggleChat = toggleChat;
 window.sendMessage = sendMessage;
