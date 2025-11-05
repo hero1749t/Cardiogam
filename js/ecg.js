@@ -63,7 +63,7 @@ class SimulatedECGSource extends ECGDataSource {
   constructor() {
     super();
     this.time = 0;
-    this.heartRate = 72;
+    this.heartRate = 58+Math.floor(Math.random() * 7);
     this.beatInterval = 60 / this.heartRate;
     this.interval = null;
     this.dataBuffer = [];
@@ -277,18 +277,18 @@ class ECGRenderer {
     
     this.ctx = this.canvas.getContext('2d');
     this.dataManager = dataManager || new ECGDataManager();
-  this.xPosition = 0;
-  this.yScale = 50; // pixels per mV baseline scale (tunable)
+    this.xPosition = 0;
+    this.yScale = 50; // pixels per mV baseline scale (tunable)
 
   // Compute pixel scaling: pixels per mm and grid size
-  this.pixelsPerMM = 4; // default; visual density (increase for tighter grid)
-  this.gridSize = ECG_CONFIG.gridSize * this.pixelsPerMM; // px per major grid
+   this.pixelsPerMM = 4; // default; visual density (increase for tighter grid)
+   this.gridSize = ECG_CONFIG.gridSize * this.pixelsPerMM; // px per major grid
 
   // Compute xSpeed in pixels per sample: speed(mm/s) * pixelsPerMM / sampleRate
-  this.xSpeed = (ECG_CONFIG.speed * this.pixelsPerMM) / ECG_CONFIG.sampleRate; // px per sample
-    this.isRunning = false;
+   this.xSpeed = (ECG_CONFIG.speed * this.pixelsPerMM) / ECG_CONFIG.sampleRate; // px per sample
+   this.isRunning = false;
     
-  this.initCanvas();
+    this.initCanvas();
     
     // Subscribe to data updates
     this.dataManager.subscribe((data) => this.onDataReceived(data));
@@ -495,7 +495,7 @@ function initHeroECG() {
   // Vary heart rate (only in simulated mode)
   if (CURRENT_MODE === ECG_MODE.SIMULATED) {
     setInterval(() => {
-      const randomHR = 68 + Math.floor(Math.random() * 10);
+      const randomHR = 58 + Math.floor(Math.random() * 8);
       dataManager.setHeartRate(randomHR);
       
       const hrElement = document.getElementById('heartRate');
